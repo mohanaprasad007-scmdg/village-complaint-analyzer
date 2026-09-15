@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VCA Department Dashboard</title>
+<title>Department Dashboard | Village Complaint Analyzer</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -15,32 +15,32 @@ radial-gradient(circle at 10% 0%,#173b3a,transparent 35%),
 radial-gradient(circle at 90% 100%,#162f50,transparent 35%),
 #07111e;
 color:#f5f7fa;
-min-height:100vh;
+min-height:100vh
 }
 
 .container{
 width:min(1200px,94%);
-margin:auto;
+margin:auto
 }
 
 nav{
-padding:20px 0;
-border-bottom:1px solid #ffffff12;
+padding:18px 0;
+border-bottom:1px solid #ffffff12
 }
 
 .nav{
 display:flex;
 align-items:center;
 justify-content:space-between;
-gap:15px;
+gap:15px
 }
 
 .logo{
 display:flex;
 align-items:center;
 gap:10px;
-font-size:19px;
-font-weight:800;
+font-size:18px;
+font-weight:800
 }
 
 .logo-icon{
@@ -49,139 +49,157 @@ height:40px;
 border-radius:12px;
 display:grid;
 place-items:center;
-background:linear-gradient(135deg,#19c9a3,#177ee9);
+background:linear-gradient(135deg,#19c9a3,#177ee9)
 }
 
-.badge{
-padding:8px 12px;
-border-radius:30px;
-border:1px solid #ffffff14;
-color:#9caabb;
+.user-area{
+display:flex;
+align-items:center;
+gap:10px
+}
+
+.department-name{
 font-size:11px;
+color:#55e3c2;
+padding:8px 11px;
+border:1px solid #19c9a32a;
+background:#19c9a310;
+border-radius:20px
+}
+
+.logout{
+border:1px solid #ffffff12;
+background:#ffffff07;
+color:#b8c3d0;
+padding:8px 12px;
+border-radius:9px;
+font-size:11px;
+cursor:pointer
 }
 
 .hero{
-padding:40px 0 25px;
+padding:38px 0 22px
 }
 
 .hero h1{
-font-size:34px;
-margin-bottom:8px;
+font-size:32px;
+margin-bottom:8px
 }
 
 .hero p{
-color:#8491a3;
 font-size:13px;
+color:#8491a3
 }
 
 .controls{
 display:flex;
-gap:12px;
-margin:20px 0;
+gap:10px;
+margin:18px 0
 }
 
-select,input{
+input,select{
 background:#081521;
 border:1px solid #ffffff12;
 color:#fff;
-padding:13px;
-border-radius:11px;
-outline:none;
-}
-
-select{
-min-width:280px;
+padding:12px;
+border-radius:10px;
+outline:none
 }
 
 input{
-flex:1;
+flex:1
 }
 
-select:focus,input:focus{
-border-color:#21cba9;
+select{
+min-width:160px
+}
+
+input:focus,select:focus{
+border-color:#21cba9
 }
 
 .btn{
 border:0;
 background:linear-gradient(135deg,#19bd9a,#187de8);
 color:white;
-padding:13px 18px;
-border-radius:11px;
+padding:12px 16px;
+border-radius:10px;
+font-size:12px;
 font-weight:bold;
-cursor:pointer;
+cursor:pointer
 }
 
 .stats{
 display:grid;
 grid-template-columns:repeat(4,1fr);
 gap:12px;
-margin:20px 0;
+margin:18px 0
 }
 
 .stat{
 padding:18px;
 background:#ffffff08;
 border:1px solid #ffffff10;
-border-radius:16px;
+border-radius:15px
 }
 
 .stat small{
 display:block;
+font-size:9px;
 color:#718094;
-font-size:10px;
-margin-bottom:7px;
+margin-bottom:7px
 }
 
 .stat strong{
-font-size:24px;
+font-size:24px
 }
 
 .card{
 background:#ffffff08;
 border:1px solid #ffffff10;
-border-radius:20px;
+border-radius:19px;
 padding:20px;
-margin-bottom:30px;
-overflow:hidden;
+margin:20px 0 35px
 }
 
 .card-title{
-font-size:18px;
-margin-bottom:16px;
+font-size:17px;
+font-weight:bold;
+margin-bottom:15px
 }
 
 .table-wrap{
-overflow-x:auto;
+overflow-x:auto
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-min-width:850px;
+min-width:900px
 }
 
 th{
 text-align:left;
-font-size:10px;
+padding:11px;
+font-size:9px;
 color:#718094;
-padding:12px;
-border-bottom:1px solid #ffffff0e;
+border-bottom:1px solid #ffffff0e
 }
 
 td{
-padding:13px 12px;
-font-size:12px;
+padding:12px 11px;
+font-size:11px;
 border-bottom:1px solid #ffffff08;
-vertical-align:top;
+vertical-align:middle
 }
 
 .id{
 color:#55e3c2;
-font-weight:bold;
+font-weight:bold
 }
 
 .priority{
-font-weight:bold;
+font-weight:bold
 }
 
 .high{color:#ffbd62}
@@ -190,70 +208,84 @@ font-weight:bold;
 .low{color:#61dfac}
 
 .status{
+display:inline-block;
 padding:6px 9px;
 border-radius:20px;
-font-size:9px;
-font-weight:bold;
-display:inline-block;
-background:#ffffff0a;
+font-size:8px;
+font-weight:bold
 }
 
 .assigned{
 color:#6eb9ff;
+background:#6eb9ff10
 }
 
 .progress{
 color:#ffd36b;
+background:#ffd36b10
 }
 
 .resolved{
 color:#59e1ad;
+background:#59e1ad10
 }
 
 .rejected{
 color:#ff7e7e;
+background:#ff7e7e10
 }
 
 .status-select{
 padding:7px;
-font-size:10px;
-border-radius:8px;
-min-width:115px;
+font-size:9px;
+border-radius:7px;
+min-width:105px
+}
+
+.view{
+border:1px solid #ffffff12;
+background:#ffffff07;
+color:#b9c4d1;
+padding:7px 9px;
+border-radius:7px;
+font-size:9px;
+cursor:pointer
 }
 
 .empty{
 text-align:center;
-padding:45px 20px;
+padding:45px;
 color:#718094;
-font-size:13px;
+font-size:12px
 }
 
 .loading{
 text-align:center;
-padding:35px;
-color:#8491a3;
+padding:40px;
+color:#8390a1;
+font-size:12px
 }
 
 .error{
-padding:13px;
+display:none;
+padding:12px;
+border-radius:10px;
 background:#ff44440d;
 border:1px solid #ff55552a;
 color:#ff9c9c;
-border-radius:10px;
-margin-bottom:15px;
-display:none;
 font-size:12px;
+margin:15px 0
 }
 
 .modal{
 position:fixed;
 inset:0;
-background:#0009;
+background:#000b;
 display:none;
 align-items:center;
 justify-content:center;
-padding:20px;
-z-index:100;
+padding:18px;
+z-index:100
 }
 
 .modal-box{
@@ -263,67 +295,97 @@ overflow:auto;
 background:#0b1927;
 border:1px solid #ffffff14;
 border-radius:20px;
-padding:24px;
-box-shadow:0 30px 100px #0008;
+padding:23px
 }
 
 .modal-head{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:20px;
+margin-bottom:20px
+}
+
+.modal-head h2{
+font-size:20px
 }
 
 .close{
-background:#ffffff0a;
 border:1px solid #ffffff12;
-color:white;
+background:#ffffff08;
+color:#fff;
 border-radius:8px;
-padding:7px 11px;
-cursor:pointer;
+padding:7px 10px;
+cursor:pointer
 }
 
 .detail{
-margin-bottom:15px;
+margin-bottom:15px
 }
 
 .detail small{
 display:block;
 color:#68778a;
-font-size:10px;
-margin-bottom:6px;
+font-size:9px;
+margin-bottom:5px
 }
 
 .detail p{
-color:#c4cdd8;
-font-size:13px;
+font-size:12px;
 line-height:1.6;
+color:#c4cdd8
 }
 
-@media(max-width:750px){
+footer{
+border-top:1px solid #ffffff0b;
+padding:23px 0;
+text-align:center;
+color:#687688;
+font-size:10px
+}
+
+@media(max-width:700px){
+
+.user-area{
+gap:5px
+}
+
+.department-name{
+max-width:160px;
+overflow:hidden;
+white-space:nowrap;
+text-overflow:ellipsis
+}
 
 .stats{
-grid-template-columns:1fr 1fr;
+grid-template-columns:1fr 1fr
 }
 
 .controls{
-flex-direction:column;
+flex-direction:column
 }
 
 select{
-width:100%;
+width:100%
 }
 
 .hero h1{
-font-size:27px;
+font-size:27px
 }
 
 }
 
-@media(max-width:450px){
+@media(max-width:430px){
 
 .stats{
-grid-template-columns:1fr;
+grid-template-columns:1fr
+}
+
+.logo{
+font-size:15px
+}
+
+.department-name{
+display:none
 }
 
 }
@@ -333,6 +395,7 @@ grid-template-columns:1fr;
 <body>
 
 <nav>
+
 <div class="container nav">
 
 <div class="logo">
@@ -340,11 +403,20 @@ grid-template-columns:1fr;
 VCA Department Dashboard
 </div>
 
-<div class="badge">
-AUTHORIZED DEPARTMENT VIEW
+<div class="user-area">
+
+<div class="department-name" id="departmentName">
+Checking...
+</div>
+
+<button class="logout" onclick="logout()">
+Logout
+</button>
+
 </div>
 
 </div>
+
 </nav>
 
 
@@ -352,10 +424,10 @@ AUTHORIZED DEPARTMENT VIEW
 
 <section class="hero">
 
-<h1>Department Complaint Dashboard</h1>
+<h1>Department Complaints</h1>
 
 <p>
-View complaints routed to your department and update their status.
+View, manage and update complaints assigned to your department.
 </p>
 
 </section>
@@ -363,27 +435,23 @@ View complaints routed to your department and update their status.
 
 <div class="controls">
 
-<select id="department">
+<input
+id="search"
+placeholder="🔎 Search complaint ID or problem..."
+>
 
-<option value="">All Departments</option>
-<option value="Panchayat">Panchayat / Local Body</option>
-<option value="Water">Water Supply</option>
-<option value="Electricity">Electricity Department</option>
-<option value="Sanitation">Sanitation</option>
-<option value="Health">Public Health</option>
-<option value="Education">Education Department</option>
-<option value="Agriculture">Agriculture Department</option>
-<option value="Police">Police / Public Safety</option>
+<select id="statusFilter">
+
+<option value="">All Status</option>
+<option value="Assigned">Assigned</option>
+<option value="In Progress">In Progress</option>
+<option value="Resolved">Resolved</option>
+<option value="Rejected">Rejected</option>
 
 </select>
 
-<input
-id="search"
-placeholder="Search Complaint ID, category or problem..."
->
-
 <button class="btn" onclick="loadComplaints()">
-🔄 Refresh
+↻ Refresh
 </button>
 
 </div>
@@ -392,7 +460,7 @@ placeholder="Search Complaint ID, category or problem..."
 <div class="stats">
 
 <div class="stat">
-<small>TOTAL</small>
+<small>TOTAL COMPLAINTS</small>
 <strong id="total">0</strong>
 </div>
 
@@ -433,7 +501,6 @@ placeholder="Search Complaint ID, category or problem..."
 <th>COMPLAINT ID</th>
 <th>CATEGORY</th>
 <th>PRIORITY</th>
-<th>DEPARTMENT</th>
 <th>STATUS</th>
 <th>DATE</th>
 <th>ACTION</th>
@@ -441,16 +508,18 @@ placeholder="Search Complaint ID, category or problem..."
 
 </thead>
 
-<tbody id="complaints">
-
-</tbody>
+<tbody id="complaints"></tbody>
 
 </table>
 
 </div>
 
-<div class="empty" id="empty">
+<div class="loading" id="loading">
 Loading complaints...
+</div>
+
+<div class="empty" id="empty" style="display:none">
+No complaints found.
 </div>
 
 </section>
@@ -524,39 +593,69 @@ Loading complaints...
 
 <script>
 
-let allComplaints=[];
+let complaints=[];
+
+
+async function checkLogin(){
+
+try{
+
+const response=await fetch("/api/me");
+
+if(!response.ok){
+
+window.location.href="/login";
+return;
+
+}
+
+const data=await response.json();
+
+if(!data.authenticated){
+
+window.location.href="/login";
+return;
+
+}
+
+document.getElementById(
+"departmentName"
+).textContent=data.department;
+
+loadComplaints();
+
+}
+catch{
+
+window.location.href="/login";
+
+}
+
+}
 
 
 async function loadComplaints(){
 
-const department=
-document.getElementById("department").value;
+const loading=document.getElementById("loading");
+const empty=document.getElementById("empty");
+const error=document.getElementById("error");
 
-const search=
-document.getElementById("search").value
-.toLowerCase()
-.trim();
-
-const error=
-document.getElementById("error");
-
-const empty=
-document.getElementById("empty");
-
+loading.style.display="block";
+empty.style.display="none";
 error.style.display="none";
 
 try{
 
-let url="/api/complaints";
+const response=await fetch(
+"/api/department"
+);
 
-if(department){
+if(response.status===401){
 
-url="/api/department/"
-+encodeURIComponent(department);
+window.location.href="/login";
+return;
 
 }
-
-const response=await fetch(url);
 
 const data=await response.json();
 
@@ -568,75 +667,81 @@ data.error||"Unable to load complaints."
 
 }
 
-allComplaints=data;
+complaints=data;
 
-if(search){
-
-allComplaints=
-allComplaints.filter(c=>{
-
-return (
-(c.complaint_id||"")
-.toLowerCase()
-.includes(search)
-
-||
-
-(c.category||"")
-.toLowerCase()
-.includes(search)
-
-||
-
-(c.complaint||"")
-.toLowerCase()
-.includes(search)
-
-||
-
-(c.department||"")
-.toLowerCase()
-.includes(search)
-
-);
-
-});
-
-}
-
-renderComplaints(allComplaints);
+filterComplaints();
 
 }
 catch(e){
 
+loading.style.display="none";
+
 error.textContent="⚠️ "+e.message;
+
 error.style.display="block";
 
-document.getElementById("complaints").innerHTML="";
-empty.style.display="block";
-empty.textContent="Unable to load complaints.";
-
 }
 
 }
 
 
-function renderComplaints(list){
+function filterComplaints(){
 
-const tbody=
-document.getElementById("complaints");
+const search=document.getElementById(
+"search"
+).value.toLowerCase().trim();
 
-const empty=
-document.getElementById("empty");
+const status=document.getElementById(
+"statusFilter"
+).value;
+
+let filtered=complaints.filter(c=>{
+
+const matchesSearch=
+!search ||
+(c.complaint_id||"")
+.toLowerCase().includes(search) ||
+(c.complaint||"")
+.toLowerCase().includes(search) ||
+(c.category||"")
+.toLowerCase().includes(search);
+
+const matchesStatus=
+!status ||
+c.status===status;
+
+return matchesSearch && matchesStatus;
+
+});
+
+render(filtered);
+
+}
+
+
+function render(list){
+
+const tbody=document.getElementById(
+"complaints"
+);
+
+const loading=document.getElementById(
+"loading"
+);
+
+const empty=document.getElementById(
+"empty"
+);
 
 tbody.innerHTML="";
+
+loading.style.display="none";
 
 updateStats(list);
 
 if(!list.length){
 
 empty.style.display="block";
-empty.textContent="No complaints found.";
 return;
 
 }
@@ -648,7 +753,7 @@ list.forEach(c=>{
 const tr=document.createElement("tr");
 
 const priorityClass=
-(c.priority||"medium").toLowerCase();
+(c.priority||"Medium").toLowerCase();
 
 const statusClass=
 getStatusClass(c.status);
@@ -656,7 +761,9 @@ getStatusClass(c.status);
 tr.innerHTML=`
 
 <td>
-<span class="id">${escapeHtml(c.complaint_id)}</span>
+<span class="id">
+${escapeHtml(c.complaint_id)}
+</span>
 </td>
 
 <td>
@@ -667,10 +774,6 @@ ${escapeHtml(c.category||"-")}
 <span class="priority ${priorityClass}">
 ${escapeHtml(c.priority||"-")}
 </span>
-</td>
-
-<td>
-${escapeHtml(c.department||"-")}
 </td>
 
 <td>
@@ -686,7 +789,7 @@ ${escapeHtml(c.created_at||"-")}
 <td>
 
 <button
-class="secondary"
+class="view"
 onclick="viewComplaint('${escapeAttr(c.complaint_id)}')">
 View
 </button>
@@ -695,7 +798,7 @@ View
 class="status-select"
 onchange="changeStatus('${escapeAttr(c.complaint_id)}',this.value)">
 
-<option value="">Status</option>
+<option value="">Update</option>
 
 <option value="Assigned"
 ${c.status==="Assigned"?"selected":""}>
@@ -731,25 +834,47 @@ tbody.appendChild(tr);
 
 function updateStats(list){
 
-document.getElementById("total").textContent=list.length;
+document.getElementById(
+"total"
+).textContent=list.length;
 
-document.getElementById("assigned").textContent=
-list.filter(c=>c.status==="Assigned").length;
+document.getElementById(
+"assigned"
+).textContent=
+list.filter(
+c=>c.status==="Assigned"
+).length;
 
-document.getElementById("progress").textContent=
-list.filter(c=>c.status==="In Progress").length;
+document.getElementById(
+"progress"
+).textContent=
+list.filter(
+c=>c.status==="In Progress"
+).length;
 
-document.getElementById("resolved").textContent=
-list.filter(c=>c.status==="Resolved").length;
+document.getElementById(
+"resolved"
+).textContent=
+list.filter(
+c=>c.status==="Resolved"
+).length;
 
 }
 
 
 function getStatusClass(status){
 
-if(status==="In Progress")return "progress";
-if(status==="Resolved")return "resolved";
-if(status==="Rejected")return "rejected";
+if(status==="In Progress"){
+return "progress";
+}
+
+if(status==="Resolved"){
+return "resolved";
+}
+
+if(status==="Rejected"){
+return "rejected";
+}
 
 return "assigned";
 
@@ -782,7 +907,7 @@ const data=await response.json();
 if(!response.ok){
 
 throw new Error(
-data.error||"Unable to update status."
+data.error||"Status update failed."
 );
 
 }
@@ -792,7 +917,10 @@ await loadComplaints();
 }
 catch(e){
 
-alert("Status update failed:\n"+e.message);
+alert(
+"Unable to update status:\n"
++e.message
+);
 
 await loadComplaints();
 
@@ -803,48 +931,81 @@ await loadComplaints();
 
 function viewComplaint(id){
 
-const complaint=
-allComplaints.find(
-c=>c.complaint_id===id
+const c=complaints.find(
+item=>item.complaint_id===id
 );
 
-if(!complaint)return;
+if(!c)return;
 
-document.getElementById("dId").textContent=
-complaint.complaint_id||"-";
+document.getElementById(
+"dId"
+).textContent=c.complaint_id||"-";
 
-document.getElementById("dComplaint").textContent=
-complaint.complaint||"-";
+document.getElementById(
+"dComplaint"
+).textContent=c.complaint||"-";
 
-document.getElementById("dCategory").textContent=
-complaint.category||"-";
+document.getElementById(
+"dCategory"
+).textContent=c.category||"-";
 
-document.getElementById("dPriority").textContent=
-complaint.priority||"-";
+document.getElementById(
+"dPriority"
+).textContent=c.priority||"-";
 
-document.getElementById("dDepartment").textContent=
-complaint.department||"-";
+document.getElementById(
+"dDepartment"
+).textContent=c.department||"-";
 
-document.getElementById("dSummary").textContent=
-complaint.summary||"-";
+document.getElementById(
+"dSummary"
+).textContent=c.summary||"-";
 
-document.getElementById("dAction").textContent=
-complaint.action||"-";
+document.getElementById(
+"dAction"
+).textContent=c.action||"-";
 
-document.getElementById("dImpact").textContent=
-complaint.impact||"-";
+document.getElementById(
+"dImpact"
+).textContent=c.impact||"-";
 
-document.getElementById("dDate").textContent=
-complaint.created_at||"-";
+document.getElementById(
+"dDate"
+).textContent=c.created_at||"-";
 
-document.getElementById("modal").style.display="flex";
+document.getElementById(
+"modal"
+).style.display="flex";
 
 }
 
 
 function closeModal(){
 
-document.getElementById("modal").style.display="none";
+document.getElementById(
+"modal"
+).style.display="none";
+
+}
+
+
+async function logout(){
+
+try{
+
+await fetch(
+"/api/logout",
+{
+method:"POST"
+}
+);
+
+}
+finally{
+
+window.location.href="/login";
+
+}
 
 }
 
@@ -870,35 +1031,37 @@ return String(value??"")
 }
 
 
-document.getElementById("department")
-.addEventListener("change",loadComplaints);
-
-document.getElementById("search")
-.addEventListener("input",function(){
-
-clearTimeout(window.searchTimer);
-
-window.searchTimer=setTimeout(
-loadComplaints,
-300
+document.getElementById(
+"search"
+).addEventListener(
+"input",
+filterComplaints
 );
 
-});
+document.getElementById(
+"statusFilter"
+).addEventListener(
+"change",
+filterComplaints
+);
 
-
-document.getElementById("modal")
-.addEventListener("click",function(e){
+document.getElementById(
+"modal"
+).addEventListener(
+"click",
+function(e){
 
 if(e.target===this){
 closeModal();
 }
 
-});
+}
+);
 
 
-loadComplaints();
+checkLogin();
 
 </script>
 
 </body>
-</html>
+  </html>
