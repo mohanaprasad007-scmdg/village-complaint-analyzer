@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Department Login | Village Complaint Analyzer</title>
+
+<style>
+*{
+box-sizing:border-box;
+margin:0;
+padding:0
+}
+
+body{
+font-family:Arial,Helvetica,sans-serif;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
+color:#f5f7fa;
+background:
+radial-gradient(circle at 15% 10%,#173d3a,transparent 35%),
+radial-gradient(circle at 90% 90%,#173052,transparent 35%),
+#07111e
+}
+
+.login-box{
+width:min(430px,100%);
+background:#ffffff09;
+border:1px solid #ffffff14;
+border-radius:25px;
+padding:30px;
+backdrop-filter:blur(20px);
+box-shadow:0 30px 90px #0007
+}
+
+.logo{
+width:52px;
+height:52px;
+border-radius:15px;
+display:grid;
+place-items:center;
+font-size:25px;
+margin-bottom:20px;
+background:linear-gradient(135deg,#19c9a3,#177ee9)
+}
+
+h1{
+font-size:26px;
+margin-bottom:8px
+}
+
+.subtitle{
+color:#8290a2;
+font-size:13px;
+line-height:1.6;
+margin-bottom:25px
+}
+
+label{
+display:block;
+font-size:12px;
+font-weight:bold;
+color:#cbd4df;
+margin-bottom:8px
+}
+
+input{
+width:100%;
+padding:14px;
+border-radius:12px;
+border:1px solid #ffffff12;
+background:#081521;
+color:white;
+font-size:14px;
+outline:none;
+margin-bottom:17px
+}
+
+input:focus{
+border-color:#22cba9;
+box-shadow:0 0 0 3px #22cba912
+}
+
+button{
+width:100%;
+padding:14px;
+border:0;
+border-radius:12px;
+background:linear-gradient(135deg,#19bd9a,#187de8);
+color:white;
+font-size:14px;
+font-weight:bold;
+cursor:pointer
+}
+
+button:disabled{
+opacity:.6;
+cursor:not-allowed
+}
+
+.error{
+display:none;
+margin-bottom:15px;
+padding:12px;
+border-radius:10px;
+background:#ff44440d;
+border:1px solid #ff55552a;
+color:#ff9d9d;
+font-size:12px
+}
+
+.info{
+margin-top:22px;
+padding:15px;
+border-radius:13px;
+background:#ffffff06;
+border:1px solid #ffffff0b
+}
+
+.info-title{
+font-size:11px;
+font-weight:bold;
+margin-bottom:9px
+}
+
+.info p{
+font-size:11px;
+color:#7f8c9e;
+line-height:1.6
+}
+
+.back{
+display:block;
+text-align:center;
+margin-top:20px;
+color:#718094;
+font-size:11px;
+text-decoration:none
+}
+
+.back:hover{
+color:#55e3c2
+}
+
+@media(max-width:450px){
+.login-box{
+padding:23px
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+
+<div class="logo">🏛️</div>
+
+<h1>Department Login</h1>
+
+<p class="subtitle">
+Authorized department officials can sign in to
+view and manage complaints assigned to their department.
+</p>
+
+<div class="error" id="error"></div>
+
+<form id="loginForm">
+
+<label for="username">
+Username
+</label>
+
+<input
+id="username"
+type="text"
+autocomplete="username"
+placeholder="Enter department username"
+required
+>
+
+<label for="password">
+Password
+</label>
+
+<input
+id="password"
+type="password"
+autocomplete="current-password"
+placeholder="Enter password"
+required
+>
+
+<button id="loginBtn" type="submit">
+🔐 Sign In
+</button>
+
+</form>
+
+<div class="info">
+
+<div class="info-title">
+🔒 Secure Department Access
+</div>
+
+<p>
+After signing in, officials can view complaints
+assigned to their department and update their status.
+</p>
+
+</div>
+
+<a class="back" href="/">
+← Back to Village Complaint Analyzer
+</a>
+
+</div>
+
+
+<script>
+
+const form=document.getElementById("loginForm");
+
+const username=document.getElementById("username");
+
+const password=document.getElementById("password");
+
+const button=document.getElementById("loginBtn");
+
+const error=document.getElementById("error");
+
+
+form.addEventListener("submit",async function(e){
+
+e.preventDefault();
+
+error.style.display="none";
+
+button.disabled=true;
+
+button.textContent="⏳ Signing in...";
+
+try{
+
+const response=await fetch(
+"/api/login",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+username:username.value.trim(),
+password:password.value
+})
+}
+);
+
+const data=await response.json();
+
+if(!response.ok){
+
+throw new Error(
+data.error||"Invalid login."
+);
+
+}
+
+window.location.href="/admin";
+
+}
+catch(err){
+
+error.textContent="⚠️ "+err.message;
+
+error.style.display="block";
+
+}
+finally{
+
+button.disabled=false;
+
+button.textContent="🔐 Sign In";
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
