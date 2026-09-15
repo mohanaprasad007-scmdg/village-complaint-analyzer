@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Village Complaint Analyzer</title>
+
+<meta name="description"
+content="AI-powered village complaint analyzer for categorizing citizen complaints, determining priority and recommending responsible departments.">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+        radial-gradient(circle at top left,#173b3a 0%,transparent 35%),
+        radial-gradient(circle at bottom right,#162d4d 0%,transparent 35%),
+        #07111f;
+    color:#f5f7fa;
+    min-height:100vh;
+}
+
+.container{
+    width:min(1100px,92%);
+    margin:auto;
+}
+
+/* NAVBAR */
+
+nav{
+    padding:22px 0;
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.nav-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+}
+
+.logo{
+    font-size:21px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.logo-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    background:linear-gradient(135deg,#18c8a0,#1683ff);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+}
+
+.nav-badge{
+    font-size:12px;
+    padding:8px 12px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:30px;
+    color:#aeb9c8;
+}
+
+/* HERO */
+
+.hero{
+    text-align:center;
+    padding:70px 0 45px;
+}
+
+.hero-badge{
+    display:inline-block;
+    padding:9px 16px;
+    border-radius:30px;
+    background:rgba(24,200,160,.1);
+    border:1px solid rgba(24,200,160,.25);
+    color:#55e3c2;
+    font-size:13px;
+    margin-bottom:22px;
+}
+
+.hero h1{
+    font-size:clamp(38px,7vw,70px);
+    line-height:1.02;
+    letter-spacing:-2px;
+    margin-bottom:20px;
+}
+
+.gradient-text{
+    background:linear-gradient(90deg,#49e0bd,#55aaff);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+}
+
+.hero p{
+    max-width:700px;
+    margin:auto;
+    color:#aab6c5;
+    font-size:17px;
+    line-height:1.7;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin:25px 0 45px;
+}
+
+.stat{
+    padding:22px;
+    text-align:center;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:18px;
+    backdrop-filter:blur(15px);
+}
+
+.stat strong{
+    display:block;
+    font-size:26px;
+    margin-bottom:5px;
+}
+
+.stat span{
+    color:#8996a7;
+    font-size:13px;
+}
+
+/* MAIN CARD */
+
+.main-card{
+    background:rgba(255,255,255,.055);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:26px;
+    padding:30px;
+    box-shadow:0 25px 80px rgba(0,0,0,.25);
+    backdrop-filter:blur(20px);
+}
+
+.section-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:9px;
+}
+
+.section-title h2{
+    font-size:24px;
+}
+
+.section-title-icon{
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    background:rgba(24,200,160,.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+}
+
+.subtitle{
+    color:#8996a7;
+    font-size:14px;
+    line-height:1.6;
+    margin-bottom:25px;
+}
+
+/* FORM */
+
+label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    color:#cbd4df;
+    margin-bottom:9px;
+}
+
+textarea{
+    width:100%;
+    min-height:190px;
+    resize:vertical;
+    background:#091522;
+    color:#f5f7fa;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;
+    padding:17px;
+    font-size:15px;
+    line-height:1.6;
+    outline:none;
+    transition:.2s;
+}
+
+textarea:focus{
+    border-color:#24cda9;
+    box-shadow:0 0 0 3px rgba(36,205,169,.08);
+}
+
+textarea::placeholder{
+    color:#657386;
+}
+
+.form-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-top:15px;
+}
+
+.counter{
+    color:#718094;
+    font-size:12px;
+}
+
+.analyze-btn{
+    border:0;
+    cursor:pointer;
+    color:white;
+    font-weight:800;
+    font-size:14px;
+    padding:14px 23px;
+    border-radius:13px;
+    background:linear-gradient(135deg,#19bd9a,#187ce8);
+    box-shadow:0 8px 25px rgba(24,150,220,.2);
+    transition:.2s;
+}
+
+.analyze-btn:hover{
+    transform:translateY(-2px);
+}
+
+.analyze-btn:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+    transform:none;
+}
+
+/* EXAMPLES */
+
+.examples{
+    margin-top:25px;
+}
+
+.examples-title{
+    font-size:12px;
+    color:#768397;
+    margin-bottom:10px;
+}
+
+.example-list{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+}
+
+.example{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    color:#aeb9c8;
+    padding:9px 12px;
+    border-radius:10px;
+    font-size:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.example:hover{
+    color:white;
+    border-color:rgba(24,200,160,.35);
+}
+
+/* LOADING */
+
+.loading{
+    display:none;
+    text-align:center;
+    padding:35px 10px;
+}
+
+.spinner{
+    width:38px;
+    height:38px;
+    border:3px solid rgba(255,255,255,.12);
+    border-top-color:#25cba9;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+    margin:0 auto 14px;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
+
+.loading p{
+    color:#8996a7;
+    font-size:13px;
+}
+
+/* RESULT */
+
+.result{
+    display:none;
+    margin-top:28px;
+}
+
+.result-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.result-header h3{
+    font-size:20px;
+}
+
+.status{
+    padding:7px 11px;
+    border-radius:20px;
+    background:rgba(24,200,160,.1);
+    border:1px solid rgba(24,200,160,.2);
+    color:#55e3c2;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.result-box{
+    background:#08131f;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:17px;
+    padding:22px;
+    line-height:1.7;
+    color:#d4dbe5;
+    font-size:14px;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+}
+
+.result-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:13px;
+}
+
+.small-btn{
+    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.04);
+    color:#b9c4d1;
+    padding:9px 13px;
+    border-radius:9px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+/* FEATURES */
+
+.features{
+    margin:55px 0;
+}
+
+.features h2{
+    text-align:center;
+    font-size:28px;
+    margin-bottom:10px;
+}
+
+.features-sub{
+    text-align:center;
+    color:#8996a7;
+    margin-bottom:28px;
+}
+
+.feature-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.feature{
+    padding:23px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:18px;
+}
+
+.feature-icon{
+    font-size:27px;
+    margin-bottom:15px;
+}
+
+.feature h3{
+    font-size:16px;
+    margin-bottom:8px;
+}
+
+.feature p{
+    color:#8491a3;
+    font-size:13px;
+    line-height:1.6;
+}
+
+/* HOW IT WORKS */
+
+.workflow{
+    margin:55px 0;
+}
+
+.workflow h2{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+
+.step{
+    position:relative;
+    text-align:center;
+    padding:20px 12px;
+}
+
+.step-number{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    margin:0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#18c8a0,#187ce8);
+    font-weight:800;
+}
+
+.step h3{
+    font-size:14px;
+    margin-bottom:6px;
+}
+
+.step p{
+    color:#7f8c9e;
+    font-size:12px;
+    line-height:1.5;
+}
+
+/* FOOTER */
+
+footer{
+    border-top:1px solid rgba(255,255,255,.07);
+    margin-top:55px;
+    padding:25px 0;
+    color:#687587;
+    font-size:12px;
+    text-align:center;
+}
+
+/* ERROR */
+
+.error{
+    display:none;
+    margin-top:18px;
+    padding:13px 15px;
+    border-radius:12px;
+    background:rgba(255,70,70,.08);
+    border:1px solid rgba(255,70,70,.2);
+    color:#ff9b9b;
+    font-size:13px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:800px){
+
+    .hero{
+        padding:50px 0 35px;
+    }
+
+    .hero h1{
+        letter-spacing:-1px;
+    }
+
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .feature-grid{
+        grid-template-columns:1fr;
+    }
+
+    .steps{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .main-card{
+        padding:21px;
+    }
+
+}
+
+@media(max-width:520px){
+
+    .container{
+        width:94%;
+    }
+
+    .nav-badge{
+        display:none;
+    }
+
+    .logo{
+        font-size:17px;
+    }
+
+    .logo-icon{
+        width:35px;
+        height:35px;
+    }
+
+    .hero p{
+        font-size:14px;
+    }
+
+    .form-bottom{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .analyze-btn{
+        width:100%;
+    }
+
+    .steps{
+        grid-template-columns:1fr;
+    }
+
+    textarea{
+        min-height:210px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+<div class="container">
+<div class="nav-inner">
+
+<div class="logo">
+<div class="logo-icon">🏛️</div>
+Village Complaint Analyzer
+</div>
+
+<div class="nav-badge">
+AI Civic Technology
+</div>
+
+</div>
+</div>
+</nav>
+
+
+<main class="container">
+
+<section class="hero">
+
+<div class="hero-badge">
+🤖 AI-Powered Civic Solution
+</div>
+
+<h1>
+Turn Village Complaints<br>
+Into <span class="gradient-text">Action</span>
+</h1>
+
+<p>
+Submit a complaint in simple language.
+Our AI analyzes the problem, identifies its
+category and priority, suggests the responsible
+department, and recommends practical action.
+</p>
+
+</section>
+
+
+<section class="stats">
+
+<div class="stat">
+<strong>01</strong>
+<span>Submit Complaint</span>
+</div>
+
+<div class="stat">
+<strong>AI</strong>
+<span>Analyze Problem</span>
+</div>
+
+<div class="stat">
+<strong>24/7</strong>
+<span>Accessible Platform</span>
+</div>
+
+</section>
+
+
+<section class="main-card">
+
+<div class="section-title">
+<div class="section-title-icon">📝</div>
+<h2>Submit a Complaint</h2>
+</div>
+
+<p class="subtitle">
+Describe the problem clearly. You can write in
+simple English. The AI will analyze the complaint
+and organize the information.
+</p>
+
+
+<label for="complaint">
+Your Complaint
+</label>
+
+<textarea
+id="complaint"
+maxlength="10000"
+placeholder="Example: There has been no drinking water in our village for five days. Elderly people and children are struggling to get water."
+></textarea>
+
+
+<div class="form-bottom">
+
+<div class="counter">
+<span id="count">0</span> / 10000 characters
+</div>
+
+<button
+class="analyze-btn"
+id="analyzeBtn"
+onclick="analyzeComplaint()">
+🔍 Analyze Complaint
+</button>
+
+</div>
+
+
+<div class="examples">
+
+<div class="examples-title">
+Try an example:
+</div>
+
+<div class="example-list">
+
+<button class="example"
+onclick="useExample(0)">
+💧 Water problem
+</button>
+
+<button class="example"
+onclick="useExample(1)">
+🛣️ Damaged road
+</button>
+
+<button class="example"
+onclick="useExample(2)">
+💡 Street lights
+</button>
+
+<button class="example"
+onclick="useExample(3)">
+🗑️ Waste problem
+</button>
+
+</div>
+
+</div>
+
+
+<div class="loading" id="loading">
+
+<div class="spinner"></div>
+
+<p>
+AI is analyzing the complaint...
+</p>
+
+</div>
+
+
+<div class="error" id="error"></div>
+
+
+<div class="result" id="result">
+
+<div class="result-header">
+
+<h3>🤖 AI Analysis</h3>
+
+<div class="status">
+Analysis Complete
+</div>
+
+</div>
+
+<div
+class="result-box"
+id="resultText">
+</div>
+
+<div class="result-actions">
+
+<button
+class="small-btn"
+onclick="copyResult()">
+📋 Copy Result
+</button>
+
+<button
+class="small-btn"
+onclick="clearResult()">
+↻ New Complaint
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+<section class="features">
+
+<h2>What the AI Analyzes</h2>
+
+<p class="features-sub">
+Every complaint is converted into useful,
+structured information.
+</p>
+
+
+<div class="feature-grid">
+
+<div class="feature">
+
+<div class="feature-icon">🏷️</div>
+
+<h3>Complaint Category</h3>
+
+<p>
+Automatically identifies whether the complaint
+concerns roads, water, electricity, sanitation,
+health, education and more.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="feature-icon">🚨</div>
+
+<h3>Priority Detection</h3>
+
+<p>
+Determines whether the problem is Low, Medium,
+High or Emergency based on its impact.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="feature-icon">🏢</div>
+
+<h3>Department</h3>
+
+<p>
+Suggests the most appropriate local government
+department or authority responsible for the issue.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="feature-icon">📋</div>
+
+<h3>Problem Summary</h3>
+
+<p>
+Converts long citizen descriptions into a clear
+and understandable summary.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="feature-icon">🛠️</div>
+
+<h3>Suggested Action</h3>
+
+<p>
+Provides practical actions that could help address
+the reported problem.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="feature-icon">👥</div>
+
+<h3>Citizen Impact</h3>
+
+<p>
+Explains how the problem affects residents,
+children, elderly people and the community.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+
+<section class="workflow">
+
+<h2>How It Works</h2>
+
+<div class="steps">
+
+<div class="step">
+
+<div class="step-number">1</div>
+
+<h3>Citizen</h3>
+
+<p>
+Citizen describes the local problem.
+</p>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">2</div>
+
+<h3>AI Analysis</h3>
+
+<p>
+AI understands and analyzes the complaint.
+</p>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">3</div>
+
+<h3>Classification</h3>
+
+<p>
+Category, priority and department are identified.
+</p>
+
+</div>
+
+
+<div class="step">
+
+<div class="step-number">4</div>
+
+<h3>Action</h3>
+
+<p>
+Recommended action is provided for resolution.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+
+<footer>
+
+<div class="container">
+Village Complaint Analyzer • AI for Better Local Governance
+</div>
+
+</footer>
+
+
+<script>
+
+const complaintBox =
+document.getElementById("complaint");
+
+const counter =
+document.getElementById("count");
+
+const analyzeBtn =
+document.getElementById("analyzeBtn");
+
+const loading =
+document.getElementById("loading");
+
+const result =
+document.getElementById("result");
+
+const resultText =
+document.getElementById("resultText");
+
+const errorBox =
+document.getElementById("error");
+
+
+complaintBox.addEventListener("input", function(){
+
+counter.textContent = complaintBox.value.length;
+
+});
+
+
+const examples = [
+
+"There has been no drinking water in our village for five days. Elderly people and children are struggling to get water.",
+
+"Our village main road has been damaged for six months. There are many potholes and school children are finding it difficult to travel safely.",
+
+"Several street lights in our village have not been working for the past two months. The roads become very dark at night and people feel unsafe.",
+
+"Garbage has not been collected from our village for more than two weeks. Waste is accumulating near houses and there is a bad smell."
+
+];
+
+
+function useExample(index){
+
+complaintBox.value = examples[index];
+
+counter.textContent =
+complaintBox.value.length;
+
+complaintBox.focus();
+
+}
+
+
+async function analyzeComplaint(){
+
+const complaint =
+complaintBox.value.trim();
+
+
+if(!complaint){
+
+showError(
+"Please enter a complaint before analyzing."
+);
+
+complaintBox.focus();
+
+return;
+
+}
+
+
+if(complaint.length < 10){
+
+showError(
+"Please provide a little more detail about the problem."
+);
+
+complaintBox.focus();
+
+return;
+
+}
+
+
+errorBox.style.display = "none";
+
+result.style.display = "none";
+
+loading.style.display = "block";
+
+analyzeBtn.disabled = true;
+
+analyzeBtn.textContent =
+"⏳ Analyzing...";
+
+
+try{
+
+const response =
+await fetch("/api/analyze",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+complaint:complaint
+})
+
+});
+
+
+const data =
+await response.json();
+
+
+if(!response.ok){
+
+throw new Error(
+data.error ||
+"Unable to analyze complaint."
+);
+
+}
+
+
+if(!data.analysis){
+
+throw new Error(
+"No analysis was returned."
+);
+
+}
+
+
+resultText.textContent =
+data.analysis;
+
+loading.style.display =
+"none";
+
+result.style.display =
+"block";
+
+
+result.scrollIntoView({
+behavior:"smooth",
+block:"center"
+});
+
+
+}
+catch(error){
+
+loading.style.display =
+"none";
+
+showError(
+error.message ||
+"Something went wrong. Please try again."
+);
+
+}
+finally{
+
+analyzeBtn.disabled =
+false;
+
+analyzeBtn.textContent =
+"🔍 Analyze Complaint";
+
+}
+
+}
+
+
+function showError(message){
+
+errorBox.textContent =
+"⚠️ " + message;
+
+errorBox.style.display =
+"block";
+
+}
+
+
+async function copyResult(){
+
+const text =
+resultText.textContent;
+
+try{
+
+await navigator.clipboard.writeText(text);
+
+const button =
+event.target;
+
+button.textContent =
+"✓ Copied";
+
+setTimeout(function(){
+
+button.textContent =
+"📋 Copy Result";
+
+},1500);
+
+}
+catch{
+
+alert("Unable to copy. Please select the text manually.");
+
+}
+
+}
+
+
+function clearResult(){
+
+complaintBox.value = "";
+
+counter.textContent = "0";
+
+result.style.display =
+"none";
+
+errorBox.style.display =
+"none";
+
+complaintBox.focus();
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+complaintBox.addEventListener(
+"keydown",
+function(event){
+
+if(
+(event.ctrlKey || event.metaKey) &&
+event.key === "Enter"
+){
+
+analyzeComplaint();
+
+}
+
+});
+
+
+</script>
+
+</body>
+</html>
