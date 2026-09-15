@@ -2,749 +2,463 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Village Complaint Analyzer</title>
-
-<meta name="description"
-content="AI-powered village complaint analyzer for categorizing citizen complaints, determining priority and recommending responsible departments.">
+<meta name="description" content="AI-powered village complaint analysis and tracking system">
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:
-        radial-gradient(circle at top left,#173b3a 0%,transparent 35%),
-        radial-gradient(circle at bottom right,#162d4d 0%,transparent 35%),
-        #07111f;
-    color:#f5f7fa;
-    min-height:100vh;
+font-family:Arial,Helvetica,sans-serif;
+background:
+radial-gradient(circle at 10% 0%,#163d3a,transparent 35%),
+radial-gradient(circle at 90% 100%,#152f50,transparent 35%),
+#07111e;
+color:#f5f7fa;
+min-height:100vh
 }
-
-.container{
-    width:min(1100px,92%);
-    margin:auto;
+.container{width:min(1080px,92%);margin:auto}
+nav{padding:20px 0;border-bottom:1px solid #ffffff12}
+.nav{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800}
+.logoicon{
+width:40px;height:40px;border-radius:12px;
+display:grid;place-items:center;
+background:linear-gradient(135deg,#19c9a3,#177ee9)
 }
-
-/* NAVBAR */
-
-nav{
-    padding:22px 0;
-    border-bottom:1px solid rgba(255,255,255,.08);
+.badge{
+padding:8px 13px;border-radius:30px;
+border:1px solid #ffffff15;color:#aeb9c8;font-size:12px
 }
-
-.nav-inner{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:20px;
+.hero{text-align:center;padding:65px 0 40px}
+.hero-tag{
+display:inline-block;padding:8px 15px;border-radius:30px;
+background:#18c9a014;border:1px solid #18c9a038;
+color:#56e4c2;font-size:12px;margin-bottom:20px
 }
-
-.logo{
-    font-size:21px;
-    font-weight:800;
-    display:flex;
-    align-items:center;
-    gap:10px;
+h1{
+font-size:clamp(38px,7vw,68px);
+line-height:1.03;letter-spacing:-2px;margin-bottom:18px
 }
-
-.logo-icon{
-    width:40px;
-    height:40px;
-    border-radius:12px;
-    background:linear-gradient(135deg,#18c8a0,#1683ff);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:21px;
+.gradient{
+background:linear-gradient(90deg,#4ae1bd,#55aaff);
+-webkit-background-clip:text;background-clip:text;color:transparent
 }
-
-.nav-badge{
-    font-size:12px;
-    padding:8px 12px;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:30px;
-    color:#aeb9c8;
-}
-
-/* HERO */
-
-.hero{
-    text-align:center;
-    padding:70px 0 45px;
-}
-
-.hero-badge{
-    display:inline-block;
-    padding:9px 16px;
-    border-radius:30px;
-    background:rgba(24,200,160,.1);
-    border:1px solid rgba(24,200,160,.25);
-    color:#55e3c2;
-    font-size:13px;
-    margin-bottom:22px;
-}
-
-.hero h1{
-    font-size:clamp(38px,7vw,70px);
-    line-height:1.02;
-    letter-spacing:-2px;
-    margin-bottom:20px;
-}
-
-.gradient-text{
-    background:linear-gradient(90deg,#49e0bd,#55aaff);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-}
-
 .hero p{
-    max-width:700px;
-    margin:auto;
-    color:#aab6c5;
-    font-size:17px;
-    line-height:1.7;
+max-width:700px;margin:auto;color:#a8b4c3;
+font-size:16px;line-height:1.7
 }
-
-/* STATS */
-
 .stats{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:15px;
-    margin:25px 0 45px;
+display:grid;grid-template-columns:repeat(3,1fr);
+gap:14px;margin:15px 0 40px
 }
-
 .stat{
-    padding:22px;
-    text-align:center;
-    background:rgba(255,255,255,.045);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:18px;
-    backdrop-filter:blur(15px);
+text-align:center;padding:20px;
+border:1px solid #ffffff10;
+background:#ffffff08;border-radius:18px
 }
+.stat b{font-size:25px;display:block;margin-bottom:5px}
+.stat span{font-size:12px;color:#8290a2}
 
-.stat strong{
-    display:block;
-    font-size:26px;
-    margin-bottom:5px;
+.card{
+background:#ffffff09;border:1px solid #ffffff12;
+border-radius:25px;padding:28px;
+backdrop-filter:blur(18px);
+box-shadow:0 25px 70px #0004
 }
-
-.stat span{
-    color:#8996a7;
-    font-size:13px;
+.title{display:flex;gap:11px;align-items:center;margin-bottom:8px}
+.titleicon{
+width:42px;height:42px;border-radius:12px;
+background:#18c9a016;display:grid;place-items:center;font-size:20px
 }
-
-/* MAIN CARD */
-
-.main-card{
-    background:rgba(255,255,255,.055);
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:26px;
-    padding:30px;
-    box-shadow:0 25px 80px rgba(0,0,0,.25);
-    backdrop-filter:blur(20px);
-}
-
-.section-title{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:9px;
-}
-
-.section-title h2{
-    font-size:24px;
-}
-
-.section-title-icon{
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    background:rgba(24,200,160,.12);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:21px;
-}
-
-.subtitle{
-    color:#8996a7;
-    font-size:14px;
-    line-height:1.6;
-    margin-bottom:25px;
-}
-
-/* FORM */
-
+h2{font-size:23px}
+.sub{color:#8290a2;font-size:13px;line-height:1.6;margin-bottom:22px}
 label{
-    display:block;
-    font-size:13px;
-    font-weight:700;
-    color:#cbd4df;
-    margin-bottom:9px;
+display:block;font-size:13px;font-weight:bold;
+color:#cbd4df;margin-bottom:8px
 }
-
-textarea{
-    width:100%;
-    min-height:190px;
-    resize:vertical;
-    background:#091522;
-    color:#f5f7fa;
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:16px;
-    padding:17px;
-    font-size:15px;
-    line-height:1.6;
-    outline:none;
-    transition:.2s;
+textarea,input{
+width:100%;border:1px solid #ffffff12;
+background:#081521;color:white;
+border-radius:14px;outline:none;
+padding:14px;font-size:14px
 }
-
-textarea:focus{
-    border-color:#24cda9;
-    box-shadow:0 0 0 3px rgba(36,205,169,.08);
+textarea{height:180px;resize:vertical;line-height:1.6}
+input:focus,textarea:focus{
+border-color:#24cdaa;
+box-shadow:0 0 0 3px #24cdaa10
 }
-
-textarea::placeholder{
-    color:#657386;
+textarea::placeholder,input::placeholder{color:#637184}
+.formrow{
+display:flex;justify-content:space-between;
+align-items:center;gap:15px;margin-top:13px
 }
-
-.form-bottom{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    margin-top:15px;
+.counter{font-size:11px;color:#6e7c8e}
+.btn{
+border:0;border-radius:12px;padding:13px 20px;
+font-size:13px;font-weight:800;cursor:pointer;color:white;
+background:linear-gradient(135deg,#19bd9a,#187de8)
 }
-
-.counter{
-    color:#718094;
-    font-size:12px;
-}
-
-.analyze-btn{
-    border:0;
-    cursor:pointer;
-    color:white;
-    font-weight:800;
-    font-size:14px;
-    padding:14px 23px;
-    border-radius:13px;
-    background:linear-gradient(135deg,#19bd9a,#187ce8);
-    box-shadow:0 8px 25px rgba(24,150,220,.2);
-    transition:.2s;
-}
-
-.analyze-btn:hover{
-    transform:translateY(-2px);
-}
-
-.analyze-btn:disabled{
-    opacity:.6;
-    cursor:not-allowed;
-    transform:none;
-}
-
-/* EXAMPLES */
-
-.examples{
-    margin-top:25px;
-}
-
-.examples-title{
-    font-size:12px;
-    color:#768397;
-    margin-bottom:10px;
-}
-
-.example-list{
-    display:flex;
-    flex-wrap:wrap;
-    gap:9px;
-}
-
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.examples{margin-top:22px}
+.example-title{font-size:11px;color:#6e7c8e;margin-bottom:9px}
+.examples-list{display:flex;flex-wrap:wrap;gap:8px}
 .example{
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-    color:#aeb9c8;
-    padding:9px 12px;
-    border-radius:10px;
-    font-size:12px;
-    cursor:pointer;
-    transition:.2s;
+background:#ffffff07;border:1px solid #ffffff0e;
+color:#aeb9c8;border-radius:9px;padding:8px 11px;
+font-size:11px;cursor:pointer
 }
-
-.example:hover{
-    color:white;
-    border-color:rgba(24,200,160,.35);
-}
-
-/* LOADING */
-
-.loading{
-    display:none;
-    text-align:center;
-    padding:35px 10px;
-}
-
+.loading{text-align:center;display:none;padding:30px}
 .spinner{
-    width:38px;
-    height:38px;
-    border:3px solid rgba(255,255,255,.12);
-    border-top-color:#25cba9;
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-    margin:0 auto 14px;
+width:36px;height:36px;border:3px solid #ffffff15;
+border-top-color:#25cba9;border-radius:50%;
+animation:spin 1s linear infinite;margin:auto auto 12px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading p{color:#8794a5;font-size:12px}
+.error{
+display:none;margin-top:18px;padding:13px;
+border-radius:11px;background:#ff44440d;
+border:1px solid #ff55552a;color:#ffaaaa;font-size:12px
 }
 
-@keyframes spin{
-    to{transform:rotate(360deg);}
+.result{display:none;margin-top:28px}
+.resulttop{
+display:flex;justify-content:space-between;
+align-items:center;gap:10px;margin-bottom:15px
 }
-
-.loading p{
-    color:#8996a7;
-    font-size:13px;
-}
-
-/* RESULT */
-
-.result{
-    display:none;
-    margin-top:28px;
-}
-
-.result-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    margin-bottom:15px;
-}
-
-.result-header h3{
-    font-size:20px;
-}
-
 .status{
-    padding:7px 11px;
-    border-radius:20px;
-    background:rgba(24,200,160,.1);
-    border:1px solid rgba(24,200,160,.2);
-    color:#55e3c2;
-    font-size:11px;
-    font-weight:bold;
+font-size:10px;font-weight:bold;padding:7px 10px;
+border-radius:20px;background:#19c9a014;
+border:1px solid #19c9a02a;color:#55e3c2
+}
+.idbox{
+background:#19c9a00d;
+border:1px solid #19c9a02a;
+padding:16px;border-radius:14px;margin-bottom:14px
+}
+.idlabel{font-size:10px;color:#789083;margin-bottom:6px}
+.idvalue{
+font-size:20px;font-weight:800;color:#59e5c4;
+word-break:break-all
+}
+.info-grid{
+display:grid;grid-template-columns:repeat(3,1fr);gap:10px
+}
+.info{
+background:#081521;border:1px solid #ffffff0d;
+padding:15px;border-radius:13px
+}
+.info small{
+display:block;color:#68788b;font-size:10px;margin-bottom:6px
+}
+.info strong{font-size:13px;line-height:1.4}
+.priority-high{color:#ffbd62}
+.priority-emergency{color:#ff7777}
+.priority-medium{color:#f1d36b}
+.priority-low{color:#61dfac}
+.result-section{
+margin-top:12px;background:#081521;
+border:1px solid #ffffff0d;padding:16px;border-radius:13px
+}
+.result-section h4{font-size:12px;margin-bottom:7px}
+.result-section p{
+color:#b7c1cd;font-size:12px;line-height:1.6
+}
+.actions{
+display:flex;justify-content:flex-end;
+gap:8px;margin-top:12px
+}
+.secondary{
+background:#ffffff07;border:1px solid #ffffff12;
+color:#b8c3d0;border-radius:9px;padding:9px 12px;
+font-size:11px;cursor:pointer
 }
 
-.result-box{
-    background:#08131f;
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:17px;
-    padding:22px;
-    line-height:1.7;
-    color:#d4dbe5;
-    font-size:14px;
-    white-space:pre-wrap;
-    overflow-wrap:anywhere;
+.track{
+margin-top:25px;padding-top:25px;
+border-top:1px solid #ffffff0b
+}
+.trackrow{display:flex;gap:8px}
+.trackrow input{flex:1}
+.track-result{display:none;margin-top:15px}
+.track-card{
+background:#081521;border:1px solid #ffffff0d;
+padding:17px;border-radius:14px
+}
+.track-id{font-weight:bold;color:#55e3c2;font-size:14px}
+.track-grid{
+display:grid;grid-template-columns:1fr 1fr;
+gap:10px;margin-top:12px
+}
+.track-item small{
+display:block;color:#667588;font-size:9px;margin-bottom:4px
+}
+.track-item b{font-size:12px}
+.notfound{
+display:none;margin-top:12px;color:#ff9b9b;font-size:12px
 }
 
-.result-actions{
-    display:flex;
-    justify-content:flex-end;
-    gap:10px;
-    margin-top:13px;
-}
-
-.small-btn{
-    border:1px solid rgba(255,255,255,.1);
-    background:rgba(255,255,255,.04);
-    color:#b9c4d1;
-    padding:9px 13px;
-    border-radius:9px;
-    cursor:pointer;
-    font-size:12px;
-}
-
-/* FEATURES */
-
-.features{
-    margin:55px 0;
-}
-
-.features h2{
-    text-align:center;
-    font-size:28px;
-    margin-bottom:10px;
-}
-
-.features-sub{
-    text-align:center;
-    color:#8996a7;
-    margin-bottom:28px;
-}
-
+.features{margin:50px 0}
+.features>h2{text-align:center;margin-bottom:8px}
+.features>p{text-align:center;color:#8290a2;font-size:13px;margin-bottom:25px}
 .feature-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:15px;
+display:grid;grid-template-columns:repeat(3,1fr);gap:14px
 }
-
 .feature{
-    padding:23px;
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:18px;
+padding:21px;border:1px solid #ffffff0d;
+background:#ffffff07;border-radius:17px
 }
+.feature-icon{font-size:25px;margin-bottom:12px}
+.feature h3{font-size:15px;margin-bottom:7px}
+.feature p{color:#8290a2;font-size:12px;line-height:1.6}
 
-.feature-icon{
-    font-size:27px;
-    margin-bottom:15px;
-}
-
-.feature h3{
-    font-size:16px;
-    margin-bottom:8px;
-}
-
-.feature p{
-    color:#8491a3;
-    font-size:13px;
-    line-height:1.6;
-}
-
-/* HOW IT WORKS */
-
-.workflow{
-    margin:55px 0;
-}
-
-.workflow h2{
-    text-align:center;
-    margin-bottom:30px;
-}
-
+.workflow{margin:50px 0}
+.workflow h2{text-align:center;margin-bottom:25px}
 .steps{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
+display:grid;grid-template-columns:repeat(4,1fr);gap:10px
 }
-
-.step{
-    position:relative;
-    text-align:center;
-    padding:20px 12px;
+.step{text-align:center;padding:12px}
+.num{
+width:40px;height:40px;border-radius:50%;
+display:grid;place-items:center;margin:auto auto 10px;
+font-weight:bold;background:linear-gradient(135deg,#19bd9a,#187de8)
 }
-
-.step-number{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    margin:0 auto 12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg,#18c8a0,#187ce8);
-    font-weight:800;
-}
-
-.step h3{
-    font-size:14px;
-    margin-bottom:6px;
-}
-
-.step p{
-    color:#7f8c9e;
-    font-size:12px;
-    line-height:1.5;
-}
-
-/* FOOTER */
+.step h3{font-size:13px;margin-bottom:5px}
+.step p{font-size:11px;color:#78879a;line-height:1.5}
 
 footer{
-    border-top:1px solid rgba(255,255,255,.07);
-    margin-top:55px;
-    padding:25px 0;
-    color:#687587;
-    font-size:12px;
-    text-align:center;
+margin-top:45px;padding:25px 0;
+border-top:1px solid #ffffff0b;
+text-align:center;color:#687688;font-size:11px
 }
 
-/* ERROR */
-
-.error{
-    display:none;
-    margin-top:18px;
-    padding:13px 15px;
-    border-radius:12px;
-    background:rgba(255,70,70,.08);
-    border:1px solid rgba(255,70,70,.2);
-    color:#ff9b9b;
-    font-size:13px;
+@media(max-width:750px){
+.stats,.feature-grid{grid-template-columns:1fr}
+.info-grid{grid-template-columns:1fr}
+.steps{grid-template-columns:1fr 1fr}
 }
-
-/* RESPONSIVE */
-
-@media(max-width:800px){
-
-    .hero{
-        padding:50px 0 35px;
-    }
-
-    .hero h1{
-        letter-spacing:-1px;
-    }
-
-    .stats{
-        grid-template-columns:1fr;
-    }
-
-    .feature-grid{
-        grid-template-columns:1fr;
-    }
-
-    .steps{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .main-card{
-        padding:21px;
-    }
-
-}
-
 @media(max-width:520px){
-
-    .container{
-        width:94%;
-    }
-
-    .nav-badge{
-        display:none;
-    }
-
-    .logo{
-        font-size:17px;
-    }
-
-    .logo-icon{
-        width:35px;
-        height:35px;
-    }
-
-    .hero p{
-        font-size:14px;
-    }
-
-    .form-bottom{
-        flex-direction:column;
-        align-items:stretch;
-    }
-
-    .analyze-btn{
-        width:100%;
-    }
-
-    .steps{
-        grid-template-columns:1fr;
-    }
-
-    textarea{
-        min-height:210px;
-    }
-
+.container{width:94%}
+.badge{display:none}
+.hero{padding:48px 0 32px}
+.hero p{font-size:14px}
+.card{padding:20px}
+.formrow{flex-direction:column;align-items:stretch}
+.btn{width:100%}
+.trackrow{flex-direction:column}
+.trackrow .btn{width:100%}
+.steps{grid-template-columns:1fr}
 }
-
 </style>
 </head>
 
 <body>
 
 <nav>
-<div class="container">
-<div class="nav-inner">
-
+<div class="container nav">
 <div class="logo">
-<div class="logo-icon">🏛️</div>
+<div class="logoicon">🏛️</div>
 Village Complaint Analyzer
 </div>
-
-<div class="nav-badge">
-AI Civic Technology
-</div>
-
-</div>
+<div class="badge">AI Civic Technology</div>
 </div>
 </nav>
-
 
 <main class="container">
 
 <section class="hero">
-
-<div class="hero-badge">
-🤖 AI-Powered Civic Solution
-</div>
-
+<div class="hero-tag">🤖 AI-POWERED CIVIC PLATFORM</div>
 <h1>
-Turn Village Complaints<br>
-Into <span class="gradient-text">Action</span>
+Report Problems.<br>
+Get <span class="gradient">Action.</span>
 </h1>
-
 <p>
-Submit a complaint in simple language.
-Our AI analyzes the problem, identifies its
-category and priority, suggests the responsible
-department, and recommends practical action.
+Submit village problems in simple language.
+AI analyzes the complaint, determines its priority,
+routes it to the appropriate department and creates
+a unique complaint ID for tracking.
 </p>
-
 </section>
-
 
 <section class="stats">
-
 <div class="stat">
-<strong>01</strong>
-<span>Submit Complaint</span>
+<b>📝</b>
+<span>Easy Complaint Submission</span>
 </div>
-
 <div class="stat">
-<strong>AI</strong>
-<span>Analyze Problem</span>
+<b>🤖</b>
+<span>AI-Powered Analysis</span>
 </div>
-
 <div class="stat">
-<strong>24/7</strong>
-<span>Accessible Platform</span>
+<b>🆔</b>
+<span>Track With Complaint ID</span>
 </div>
-
 </section>
 
+<section class="card">
 
-<section class="main-card">
-
-<div class="section-title">
-<div class="section-title-icon">📝</div>
+<div class="title">
+<div class="titleicon">📝</div>
 <h2>Submit a Complaint</h2>
 </div>
 
-<p class="subtitle">
-Describe the problem clearly. You can write in
-simple English. The AI will analyze the complaint
-and organize the information.
+<p class="sub">
+Describe the problem with as much useful detail as possible.
+The AI will classify and route it automatically.
 </p>
 
+<label for="complaint">Your Complaint</label>
 
-<label for="complaint">
-Your Complaint
-</label>
-
-<textarea
-id="complaint"
+<textarea id="complaint"
 maxlength="10000"
-placeholder="Example: There has been no drinking water in our village for five days. Elderly people and children are struggling to get water."
-></textarea>
+placeholder="Example: There has been no drinking water in our village for five days. Elderly people and children are struggling to get water."></textarea>
 
-
-<div class="form-bottom">
-
+<div class="formrow">
 <div class="counter">
 <span id="count">0</span> / 10000 characters
 </div>
 
-<button
-class="analyze-btn"
-id="analyzeBtn"
+<button class="btn" id="analyzeBtn"
 onclick="analyzeComplaint()">
-🔍 Analyze Complaint
+🔍 Analyze & Submit
 </button>
-
 </div>
-
 
 <div class="examples">
+<div class="example-title">Try an example:</div>
 
-<div class="examples-title">
-Try an example:
+<div class="examples-list">
+<button class="example" onclick="useExample(0)">💧 Water</button>
+<button class="example" onclick="useExample(1)">🛣️ Road</button>
+<button class="example" onclick="useExample(2)">💡 Street Lights</button>
+<button class="example" onclick="useExample(3)">🗑️ Waste</button>
 </div>
-
-<div class="example-list">
-
-<button class="example"
-onclick="useExample(0)">
-💧 Water problem
-</button>
-
-<button class="example"
-onclick="useExample(1)">
-🛣️ Damaged road
-</button>
-
-<button class="example"
-onclick="useExample(2)">
-💡 Street lights
-</button>
-
-<button class="example"
-onclick="useExample(3)">
-🗑️ Waste problem
-</button>
-
 </div>
-
-</div>
-
 
 <div class="loading" id="loading">
-
 <div class="spinner"></div>
-
-<p>
-AI is analyzing the complaint...
-</p>
-
+<p>AI is analyzing and routing your complaint...</p>
 </div>
-
 
 <div class="error" id="error"></div>
 
-
 <div class="result" id="result">
 
-<div class="result-header">
+<div class="resulttop">
+<h3>✅ Complaint Submitted</h3>
+<div class="status">ASSIGNED</div>
+</div>
 
-<h3>🤖 AI Analysis</h3>
+<div class="idbox">
+<div class="idlabel">YOUR COMPLAINT ID</div>
+<div class="idvalue" id="complaintId">-</div>
+</div>
 
-<div class="status">
-Analysis Complete
+<div class="info-grid">
+
+<div class="info">
+<small>CATEGORY</small>
+<strong id="category">-</strong>
+</div>
+
+<div class="info">
+<small>PRIORITY</small>
+<strong id="priority">-</strong>
+</div>
+
+<div class="info">
+<small>DEPARTMENT</small>
+<strong id="department">-</strong>
 </div>
 
 </div>
 
-<div
-class="result-box"
-id="resultText">
+<div class="result-section">
+<h4>📋 Complaint Summary</h4>
+<p id="summary">-</p>
 </div>
 
-<div class="result-actions">
+<div class="result-section">
+<h4>🛠️ Recommended Action</h4>
+<p id="action">-</p>
+</div>
 
-<button
-class="small-btn"
-onclick="copyResult()">
-📋 Copy Result
+<div class="result-section">
+<h4>👥 Citizen Impact</h4>
+<p id="impact">-</p>
+</div>
+
+<div class="actions">
+<button class="secondary" onclick="copyComplaintId()">
+📋 Copy ID
 </button>
-
-<button
-class="small-btn"
-onclick="clearResult()">
+<button class="secondary" onclick="newComplaint()">
 ↻ New Complaint
 </button>
+</div>
 
+</div>
+
+
+<div class="track">
+
+<div class="title">
+<div class="titleicon">🔎</div>
+<h2>Track Complaint</h2>
+</div>
+
+<p class="sub">
+Already submitted a complaint? Enter your Complaint ID
+to check its current status.
+</p>
+
+<div class="trackrow">
+<input id="trackId"
+placeholder="Example: VCA-20260915-A3F91C">
+<button class="btn" onclick="trackComplaint()">
+🔎 Track
+</button>
+</div>
+
+<div class="notfound" id="trackError"></div>
+
+<div class="track-result" id="trackResult">
+
+<div class="track-card">
+
+<div class="track-id" id="trackComplaintId">-</div>
+
+<div class="track-grid">
+
+<div class="track-item">
+<small>STATUS</small>
+<b id="trackStatus">-</b>
+</div>
+
+<div class="track-item">
+<small>DEPARTMENT</small>
+<b id="trackDepartment">-</b>
+</div>
+
+<div class="track-item">
+<small>CATEGORY</small>
+<b id="trackCategory">-</b>
+</div>
+
+<div class="track-item">
+<small>PRIORITY</small>
+<b id="trackPriority">-</b>
+</div>
+
+<div class="track-item">
+<small>SUBMITTED</small>
+<b id="trackDate">-</b>
+</div>
+
+</div>
+
+</div>
 </div>
 
 </div>
@@ -754,102 +468,69 @@ onclick="clearResult()">
 
 <section class="features">
 
-<h2>What the AI Analyzes</h2>
+<h2>AI Complaint Processing</h2>
 
-<p class="features-sub">
-Every complaint is converted into useful,
-structured information.
+<p>
+Every complaint is converted into structured information.
 </p>
-
 
 <div class="feature-grid">
 
 <div class="feature">
-
 <div class="feature-icon">🏷️</div>
-
-<h3>Complaint Category</h3>
-
+<h3>Automatic Category</h3>
 <p>
-Automatically identifies whether the complaint
-concerns roads, water, electricity, sanitation,
-health, education and more.
+Identifies whether the issue concerns roads,
+water, electricity, sanitation, health and more.
 </p>
-
 </div>
 
-
 <div class="feature">
-
 <div class="feature-icon">🚨</div>
-
 <h3>Priority Detection</h3>
-
 <p>
-Determines whether the problem is Low, Medium,
-High or Emergency based on its impact.
+Classifies complaints as Low, Medium, High
+or Emergency according to their impact.
 </p>
-
 </div>
 
-
 <div class="feature">
-
 <div class="feature-icon">🏢</div>
-
-<h3>Department</h3>
-
+<h3>Department Routing</h3>
 <p>
-Suggests the most appropriate local government
-department or authority responsible for the issue.
+Determines which local authority or department
+is most appropriate for the complaint.
 </p>
-
 </div>
 
-
 <div class="feature">
-
-<div class="feature-icon">📋</div>
-
-<h3>Problem Summary</h3>
-
+<div class="feature-icon">🆔</div>
+<h3>Unique Complaint ID</h3>
 <p>
-Converts long citizen descriptions into a clear
-and understandable summary.
+Every submitted complaint receives a unique
+reference number for future tracking.
 </p>
-
 </div>
 
+<div class="feature">
+<div class="feature-icon">📊</div>
+<h3>Status Tracking</h3>
+<p>
+Citizens can check whether a complaint is
+assigned, in progress, resolved or rejected.
+</p>
+</div>
 
 <div class="feature">
-
 <div class="feature-icon">🛠️</div>
-
 <h3>Suggested Action</h3>
-
 <p>
-Provides practical actions that could help address
-the reported problem.
+AI provides practical recommendations for
+addressing the reported problem.
 </p>
-
-</div>
-
-
-<div class="feature">
-
-<div class="feature-icon">👥</div>
-
-<h3>Citizen Impact</h3>
-
-<p>
-Explains how the problem affects residents,
-children, elderly people and the community.
-</p>
-
 </div>
 
 </div>
-
 </section>
 
 
@@ -860,248 +541,158 @@ children, elderly people and the community.
 <div class="steps">
 
 <div class="step">
-
-<div class="step-number">1</div>
-
-<h3>Citizen</h3>
-
-<p>
-Citizen describes the local problem.
-</p>
-
+<div class="num">1</div>
+<h3>Submit</h3>
+<p>Citizen reports a village problem.</p>
 </div>
-
 
 <div class="step">
-
-<div class="step-number">2</div>
-
-<h3>AI Analysis</h3>
-
-<p>
-AI understands and analyzes the complaint.
-</p>
-
+<div class="num">2</div>
+<h3>Analyze</h3>
+<p>AI understands the complaint.</p>
 </div>
-
 
 <div class="step">
-
-<div class="step-number">3</div>
-
-<h3>Classification</h3>
-
-<p>
-Category, priority and department are identified.
-</p>
-
+<div class="num">3</div>
+<h3>Route</h3>
+<p>Complaint is assigned to the appropriate department.</p>
 </div>
-
 
 <div class="step">
-
-<div class="step-number">4</div>
-
-<h3>Action</h3>
-
-<p>
-Recommended action is provided for resolution.
-</p>
-
+<div class="num">4</div>
+<h3>Track</h3>
+<p>Citizen follows the complaint using its ID.</p>
 </div>
 
 </div>
-
 </section>
 
 </main>
 
-
 <footer>
-
 <div class="container">
 Village Complaint Analyzer • AI for Better Local Governance
 </div>
-
 </footer>
 
 
 <script>
 
-const complaintBox =
-document.getElementById("complaint");
+const complaintBox=document.getElementById("complaint");
+const count=document.getElementById("count");
+const analyzeBtn=document.getElementById("analyzeBtn");
+const loading=document.getElementById("loading");
+const result=document.getElementById("result");
+const errorBox=document.getElementById("error");
 
-const counter =
-document.getElementById("count");
-
-const analyzeBtn =
-document.getElementById("analyzeBtn");
-
-const loading =
-document.getElementById("loading");
-
-const result =
-document.getElementById("result");
-
-const resultText =
-document.getElementById("resultText");
-
-const errorBox =
-document.getElementById("error");
+let latestComplaintId="";
 
 
-complaintBox.addEventListener("input", function(){
-
-counter.textContent = complaintBox.value.length;
-
+complaintBox.addEventListener("input",function(){
+count.textContent=complaintBox.value.length;
 });
 
 
-const examples = [
-
+const examples=[
 "There has been no drinking water in our village for five days. Elderly people and children are struggling to get water.",
-
 "Our village main road has been damaged for six months. There are many potholes and school children are finding it difficult to travel safely.",
-
 "Several street lights in our village have not been working for the past two months. The roads become very dark at night and people feel unsafe.",
-
 "Garbage has not been collected from our village for more than two weeks. Waste is accumulating near houses and there is a bad smell."
-
 ];
 
 
-function useExample(index){
-
-complaintBox.value = examples[index];
-
-counter.textContent =
-complaintBox.value.length;
-
+function useExample(i){
+complaintBox.value=examples[i];
+count.textContent=complaintBox.value.length;
 complaintBox.focus();
-
 }
 
 
 async function analyzeComplaint(){
 
-const complaint =
-complaintBox.value.trim();
-
+const complaint=complaintBox.value.trim();
 
 if(!complaint){
-
-showError(
-"Please enter a complaint before analyzing."
-);
-
-complaintBox.focus();
-
+showError("Please enter a complaint.");
 return;
-
 }
 
-
-if(complaint.length < 10){
-
-showError(
-"Please provide a little more detail about the problem."
-);
-
-complaintBox.focus();
-
+if(complaint.length<10){
+showError("Please provide more details about the problem.");
 return;
-
 }
 
-
-errorBox.style.display = "none";
-
-result.style.display = "none";
-
-loading.style.display = "block";
-
-analyzeBtn.disabled = true;
-
-analyzeBtn.textContent =
-"⏳ Analyzing...";
-
+errorBox.style.display="none";
+result.style.display="none";
+loading.style.display="block";
+analyzeBtn.disabled=true;
+analyzeBtn.textContent="⏳ Processing...";
 
 try{
 
-const response =
-await fetch("/api/analyze",{
-
+const response=await fetch("/api/analyze",{
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-complaint:complaint
-})
-
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({complaint:complaint})
 });
 
-
-const data =
-await response.json();
-
+const data=await response.json();
 
 if(!response.ok){
-
-throw new Error(
-data.error ||
-"Unable to analyze complaint."
-);
-
+throw new Error(data.error||"Complaint processing failed.");
 }
 
-
-if(!data.analysis){
-
-throw new Error(
-"No analysis was returned."
-);
-
+if(!data.complaint_id){
+throw new Error("Complaint ID was not generated.");
 }
 
+latestComplaintId=data.complaint_id;
 
-resultText.textContent =
-data.analysis;
+document.getElementById("complaintId").textContent=data.complaint_id;
+document.getElementById("category").textContent=data.category||"Other";
 
-loading.style.display =
-"none";
+const priority=document.getElementById("priority");
+priority.textContent=data.priority||"Medium";
+priority.className="";
 
-result.style.display =
-"block";
+const p=(data.priority||"Medium").toLowerCase();
 
+if(p==="high")priority.classList.add("priority-high");
+if(p==="emergency")priority.classList.add("priority-emergency");
+if(p==="medium")priority.classList.add("priority-medium");
+if(p==="low")priority.classList.add("priority-low");
+
+document.getElementById("department").textContent=
+data.department||"Local Administration";
+
+document.getElementById("summary").textContent=
+data.summary||"No summary available.";
+
+document.getElementById("action").textContent=
+data.action||"No recommended action available.";
+
+document.getElementById("impact").textContent=
+data.impact||"No impact information available.";
+
+loading.style.display="none";
+result.style.display="block";
 
 result.scrollIntoView({
 behavior:"smooth",
 block:"center"
 });
 
-
 }
 catch(error){
 
-loading.style.display =
-"none";
-
-showError(
-error.message ||
-"Something went wrong. Please try again."
-);
+loading.style.display="none";
+showError(error.message||"Something went wrong.");
 
 }
 finally{
 
-analyzeBtn.disabled =
-false;
-
-analyzeBtn.textContent =
-"🔍 Analyze Complaint";
+analyzeBtn.disabled=false;
+analyzeBtn.textContent="🔍 Analyze & Submit";
 
 }
 
@@ -1109,60 +700,37 @@ analyzeBtn.textContent =
 
 
 function showError(message){
+errorBox.textContent="⚠️ "+message;
+errorBox.style.display="block";
+}
 
-errorBox.textContent =
-"⚠️ " + message;
 
-errorBox.style.display =
-"block";
+function copyComplaintId(){
+
+if(!latestComplaintId)return;
+
+navigator.clipboard.writeText(latestComplaintId)
+.then(function(){
+
+alert("Complaint ID copied:\n"+latestComplaintId);
+
+})
+.catch(function(){
+
+alert("Your Complaint ID is:\n"+latestComplaintId);
+
+});
 
 }
 
 
-async function copyResult(){
+function newComplaint(){
 
-const text =
-resultText.textContent;
-
-try{
-
-await navigator.clipboard.writeText(text);
-
-const button =
-event.target;
-
-button.textContent =
-"✓ Copied";
-
-setTimeout(function(){
-
-button.textContent =
-"📋 Copy Result";
-
-},1500);
-
-}
-catch{
-
-alert("Unable to copy. Please select the text manually.");
-
-}
-
-}
-
-
-function clearResult(){
-
-complaintBox.value = "";
-
-counter.textContent = "0";
-
-result.style.display =
-"none";
-
-errorBox.style.display =
-"none";
-
+complaintBox.value="";
+count.textContent="0";
+result.style.display="none";
+errorBox.style.display="none";
+latestComplaintId="";
 complaintBox.focus();
 
 window.scrollTo({
@@ -1173,21 +741,83 @@ behavior:"smooth"
 }
 
 
-complaintBox.addEventListener(
-"keydown",
-function(event){
+async function trackComplaint(){
 
-if(
-(event.ctrlKey || event.metaKey) &&
-event.key === "Enter"
-){
+const id=document.getElementById("trackId").value.trim();
+const trackError=document.getElementById("trackError");
+const trackResult=document.getElementById("trackResult");
 
-analyzeComplaint();
+trackError.style.display="none";
+trackResult.style.display="none";
 
+if(!id){
+
+trackError.textContent="Please enter your Complaint ID.";
+trackError.style.display="block";
+return;
+
+}
+
+try{
+
+const response=await fetch(
+"/api/complaint/"+encodeURIComponent(id)
+);
+
+const data=await response.json();
+
+if(!response.ok){
+throw new Error(data.error||"Complaint not found.");
+}
+
+document.getElementById("trackComplaintId").textContent=
+data.complaint_id;
+
+document.getElementById("trackStatus").textContent=
+data.status||"Assigned";
+
+document.getElementById("trackDepartment").textContent=
+data.department||"-";
+
+document.getElementById("trackCategory").textContent=
+data.category||"-";
+
+document.getElementById("trackPriority").textContent=
+data.priority||"-";
+
+document.getElementById("trackDate").textContent=
+data.created_at||"-";
+
+trackResult.style.display="block";
+
+}
+catch(error){
+
+trackError.textContent="⚠️ "+error.message;
+trackError.style.display="block";
+
+}
+
+}
+
+
+document.getElementById("trackId")
+.addEventListener("keydown",function(e){
+
+if(e.key==="Enter"){
+trackComplaint();
 }
 
 });
 
+
+complaintBox.addEventListener("keydown",function(e){
+
+if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){
+analyzeComplaint();
+}
+
+});
 
 </script>
 
