@@ -13,6 +13,7 @@ app.secret_key = os.environ.get(
     "change-this-secret-key"
 )
 
+# OpenAI
 client = OpenAI(
     api_key=os.environ.get("OPENAI_API_KEY")
 )
@@ -30,61 +31,51 @@ DEPARTMENTS = {
         "username": "road",
         "password": "road123"
     },
-
     "WATER": {
         "name": "Water Supply Department",
         "username": "water",
         "password": "water123"
     },
-
     "ELECTRICITY": {
         "name": "Electricity Department",
         "username": "electricity",
         "password": "electricity123"
     },
-
     "STREET_LIGHT": {
         "name": "Panchayat / Local Body",
         "username": "streetlight",
         "password": "street123"
     },
-
     "SANITATION": {
         "name": "Sanitation Department",
         "username": "sanitation",
         "password": "sanitation123"
     },
-
     "DRAINAGE": {
         "name": "Panchayat / Local Body",
         "username": "drainage",
         "password": "drainage123"
     },
-
     "HEALTH": {
         "name": "Public Health Department",
         "username": "health",
         "password": "health123"
     },
-
     "EDUCATION": {
         "name": "Education Department",
         "username": "education",
         "password": "education123"
     },
-
     "AGRICULTURE": {
         "name": "Agriculture Department",
         "username": "agriculture",
         "password": "agriculture123"
     },
-
     "SAFETY": {
         "name": "Police / Public Safety",
         "username": "police",
         "password": "police123"
     },
-
     "OTHER": {
         "name": "Panchayat / Local Administration",
         "username": "admin",
@@ -98,7 +89,6 @@ DEPARTMENTS = {
 # =========================================================
 
 def init_db():
-
     conn = sqlite3.connect(DB_NAME)
 
     conn.execute("""
@@ -123,7 +113,6 @@ def init_db():
 
 
 def upgrade_old_database():
-
     conn = sqlite3.connect(DB_NAME)
 
     columns = [
@@ -134,7 +123,6 @@ def upgrade_old_database():
     ]
 
     if "department_code" not in columns:
-
         conn.execute("""
             ALTER TABLE complaints
             ADD COLUMN department_code TEXT
@@ -154,7 +142,6 @@ upgrade_old_database()
 
 @app.route("/")
 def home():
-
     return send_from_directory(
         ".",
         "index.html"
@@ -167,7 +154,6 @@ def home():
 
 @app.route("/login")
 def login():
-
     if "department_code" in session:
         return redirect("/admin")
 
@@ -183,7 +169,6 @@ def login():
 
 @app.route("/admin")
 def admin():
-
     if "department_code" not in session:
         return redirect("/login")
 
@@ -218,9 +203,7 @@ def api_login():
         ):
 
             session["department_code"] = code
-
-            session["department_name"] = \
-                department["name"]
+            session["department_name"] = department["name"]
 
             return jsonify({
                 "success": True,
@@ -288,7 +271,7 @@ def current_user():
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
 
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     complaint = str(
         data.get("complaint", "")
@@ -301,6 +284,16 @@ def analyze():
         }), 400
 
     complaint = complaint[:10000]
+
+    # Check API key before making the request
+    api_key = os.environ.get("OPENAI_API_KEY")
+
+    if not api_key:
+
+        return jsonify({
+            "error": "OpenAI API key is not configured.",
+            "details": "Please add OPENAI_API_KEY in Render Environment Variables."
+        }), 500
 
     prompt = f"""
 You are an AI Village Complaint Analyzer.
@@ -419,6 +412,7 @@ official names or guarantees.
 
         ai_text = response.output_text.strip()
 
+        # Remove markdown code fences if returned
         ai_text = ai_text.replace(
             "```json",
             ""
@@ -433,19 +427,25 @@ official names or guarantees.
 
         analysis = json.loads(ai_text)
 
-        category = analysis.get(
-            "category",
-            "Other"
-        )
+        category = str(
+            analysis.get(
+                "category",
+                "Other"
+            )
+        ).strip()
 
-        priority = analysis.get(
-            "priority",
-            "Medium"
-        )
+        priority = str(
+            analysis.get(
+                "priority",
+                "Medium"
+            )
+        ).strip()
 
-        department_code = analysis.get(
-            "department_code",
-            "OTHER"
+        department_code = str(
+            analysis.get(
+                "department_code",
+                "OTHER"
+            )
         ).upper().strip()
 
         # Safety fallback
@@ -456,20 +456,26 @@ official names or guarantees.
             department_code
         ]["name"]
 
-        summary = analysis.get(
-            "summary",
-            ""
-        )
+        summary = str(
+            analysis.get(
+                "summary",
+                ""
+            )
+        ).strip()
 
-        action = analysis.get(
-            "action",
-            ""
-        )
+        action = str(
+            analysis.get(
+                "action",
+                ""
+            )
+        ).strip()
 
-        impact = analysis.get(
-            "impact",
-            ""
-        )
+        impact = str(
+            analysis.get(
+                "impact",
+                ""
+            )
+        ).strip()
 
         complaint_id = (
             "VCA-"
@@ -530,21 +536,31 @@ official names or guarantees.
             "status": "Assigned"
         })
 
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
+
+        print(
+            "AI JSON ERROR:",
+            repr(e)
+        )
 
         return jsonify({
-            "error":
-            "AI returned an invalid response. Please try again."
+            "error": "AI returned an invalid response.",
+            "details": str(e)
         }), 500
 
     except Exception as e:
 
-    print("OPENAI/API ERROR:", repr(e))
+        # IMPORTANT:
+        # This block must stay indented.
+        print(
+            "OPENAI/API ERROR:",
+            repr(e)
+        )
 
-    return jsonify({
-        "error": "Complaint processing failed.",
-        "details": str(e)
-    }), 500
+        return jsonify({
+            "error": "Complaint processing failed.",
+            "details": str(e)
+        }), 500
 
 
 # =========================================================
@@ -630,7 +646,6 @@ def get_complaints():
 
     code = session["department_code"]
 
-    # Only OTHER/admin account gets global view
     if code != "OTHER":
 
         return jsonify({
@@ -672,7 +687,7 @@ def update_status(complaint_id):
             "error": "Authentication required."
         }), 401
 
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     status = str(
         data.get("status", "")
@@ -749,7 +764,10 @@ def health():
     return jsonify({
         "status": "ok",
         "service": "Village Complaint Analyzer",
-        "database": "connected"
+        "database": "connected",
+        "openai_configured": bool(
+            os.environ.get("OPENAI_API_KEY")
+        )
     })
 
 
@@ -767,4 +785,4 @@ if __name__ == "__main__":
                 5000
             )
         )
-    )
+)
