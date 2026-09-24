@@ -539,11 +539,12 @@ official names or guarantees.
 
     except Exception as e:
 
-        return jsonify({
-            "error":
-            "Complaint processing failed.",
-            "details": str(e)
-        }), 500
+    print("OPENAI/API ERROR:", repr(e))
+
+    return jsonify({
+        "error": "Complaint processing failed.",
+        "details": str(e)
+    }), 500
 
 
 # =========================================================
