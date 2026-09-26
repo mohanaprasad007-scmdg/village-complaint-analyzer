@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, send_from_directory, session, redirec
 from openai import OpenAI
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
+import psycopg2
+import psycopg2.extras
 import os
 from datetime import datetime
 import uuid
