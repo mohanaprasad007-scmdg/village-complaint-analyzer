@@ -3,391 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Department Dashboard | Village Complaint Analyzer</title>
-
+<title>VCA Department Dashboard</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-
 body{
 font-family:Arial,Helvetica,sans-serif;
-background:
-radial-gradient(circle at 10% 0%,#173b3a,transparent 35%),
-radial-gradient(circle at 90% 100%,#162f50,transparent 35%),
-#07111e;
-color:#f5f7fa;
-min-height:100vh
+background:radial-gradient(circle at 10% 0%,#173b3a,transparent 35%),
+radial-gradient(circle at 90% 100%,#162f50,transparent 35%),#07111e;
+color:#f5f7fa;min-height:100vh
 }
-
-.container{
-width:min(1200px,94%);
-margin:auto
+.container{width:min(1200px,94%);margin:auto}
+nav{padding:18px 0;border-bottom:1px solid #ffffff12}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.logo{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800}
+.logo-icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#19c9a3,#177ee9)}
+.user-area{display:flex;align-items:center;gap:10px}
+.department-name{font-size:11px;color:#55e3c2;padding:8px 11px;border:1px solid #19c9a32a;background:#19c9a310;border-radius:20px}
+.logout,.secondary{
+border:1px solid #ffffff12;background:#ffffff07;color:#b8c3d0;
+padding:9px 13px;border-radius:9px;font-size:11px;cursor:pointer
 }
-
-nav{
-padding:18px 0;
-border-bottom:1px solid #ffffff12
-}
-
-.nav{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:15px
-}
-
-.logo{
-display:flex;
-align-items:center;
-gap:10px;
-font-size:18px;
-font-weight:800
-}
-
-.logo-icon{
-width:40px;
-height:40px;
-border-radius:12px;
-display:grid;
-place-items:center;
-background:linear-gradient(135deg,#19c9a3,#177ee9)
-}
-
-.user-area{
-display:flex;
-align-items:center;
-gap:10px
-}
-
-.department-name{
-font-size:11px;
-color:#55e3c2;
-padding:8px 11px;
-border:1px solid #19c9a32a;
-background:#19c9a310;
-border-radius:20px
-}
-
-.logout{
-border:1px solid #ffffff12;
-background:#ffffff07;
-color:#b8c3d0;
-padding:8px 12px;
-border-radius:9px;
-font-size:11px;
-cursor:pointer
-}
-
-.hero{
-padding:38px 0 22px
-}
-
-.hero h1{
-font-size:32px;
-margin-bottom:8px
-}
-
-.hero p{
-font-size:13px;
-color:#8491a3
-}
-
-.controls{
-display:flex;
-gap:10px;
-margin:18px 0
-}
-
+.hero{padding:38px 0 22px}
+.hero h1{font-size:32px;margin-bottom:8px}
+.hero p{font-size:13px;color:#8491a3}
+.controls{display:flex;gap:10px;margin:18px 0}
 input,select{
-background:#081521;
-border:1px solid #ffffff12;
-color:#fff;
-padding:12px;
-border-radius:10px;
-outline:none
+background:#081521;border:1px solid #ffffff12;color:#fff;
+padding:12px;border-radius:10px;outline:none
 }
-
-input{
-flex:1
-}
-
-select{
-min-width:160px
-}
-
-input:focus,select:focus{
-border-color:#21cba9
-}
-
+input{flex:1}select{min-width:160px}
+input:focus,select:focus{border-color:#21cba9}
 .btn{
-border:0;
-background:linear-gradient(135deg,#19bd9a,#187de8);
-color:white;
-padding:12px 16px;
-border-radius:10px;
-font-size:12px;
-font-weight:bold;
-cursor:pointer
+border:0;background:linear-gradient(135deg,#19bd9a,#187de8);
+color:white;padding:12px 16px;border-radius:10px;font-size:12px;
+font-weight:bold;cursor:pointer
 }
-
-.stats{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px;
-margin:18px 0
-}
-
-.stat{
-padding:18px;
-background:#ffffff08;
-border:1px solid #ffffff10;
-border-radius:15px
-}
-
-.stat small{
-display:block;
-font-size:9px;
-color:#718094;
-margin-bottom:7px
-}
-
-.stat strong{
-font-size:24px
-}
-
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0}
+.stat{padding:18px;background:#ffffff08;border:1px solid #ffffff10;border-radius:15px}
+.stat small{display:block;font-size:9px;color:#718094;margin-bottom:7px}
+.stat strong{font-size:24px}
 .card{
-background:#ffffff08;
-border:1px solid #ffffff10;
-border-radius:19px;
-padding:20px;
-margin:20px 0 35px
+background:#ffffff08;border:1px solid #ffffff10;border-radius:19px;
+padding:20px;margin:20px 0 35px
 }
-
-.card-title{
-font-size:17px;
-font-weight:bold;
-margin-bottom:15px
-}
-
-.table-wrap{
-overflow-x:auto
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-min-width:900px
-}
-
-th{
-text-align:left;
-padding:11px;
-font-size:9px;
-color:#718094;
-border-bottom:1px solid #ffffff0e
-}
-
-td{
-padding:12px 11px;
-font-size:11px;
-border-bottom:1px solid #ffffff08;
-vertical-align:middle
-}
-
-.id{
-color:#55e3c2;
-font-weight:bold
-}
-
-.priority{
-font-weight:bold
-}
-
-.high{color:#ffbd62}
-.emergency{color:#ff7474}
-.medium{color:#efd46d}
-.low{color:#61dfac}
-
-.status{
-display:inline-block;
-padding:6px 9px;
-border-radius:20px;
-font-size:8px;
-font-weight:bold
-}
-
-.assigned{
-color:#6eb9ff;
-background:#6eb9ff10
-}
-
-.progress{
-color:#ffd36b;
-background:#ffd36b10
-}
-
-.resolved{
-color:#59e1ad;
-background:#59e1ad10
-}
-
-.rejected{
-color:#ff7e7e;
-background:#ff7e7e10
-}
-
-.status-select{
-padding:7px;
-font-size:9px;
-border-radius:7px;
-min-width:105px
-}
-
-.view{
-border:1px solid #ffffff12;
-background:#ffffff07;
-color:#b9c4d1;
-padding:7px 9px;
-border-radius:7px;
-font-size:9px;
-cursor:pointer
-}
-
-.empty{
-text-align:center;
-padding:45px;
-color:#718094;
-font-size:12px
-}
-
-.loading{
-text-align:center;
-padding:40px;
-color:#8390a1;
-font-size:12px
-}
-
+.card-title{font-size:17px;font-weight:bold;margin-bottom:15px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th{text-align:left;padding:11px;font-size:9px;color:#718094;border-bottom:1px solid #ffffff0e}
+td{padding:12px 11px;font-size:11px;border-bottom:1px solid #ffffff08;vertical-align:middle}
+.id{color:#55e3c2;font-weight:bold}
+.priority{font-weight:bold}
+.high{color:#ffbd62}.emergency{color:#ff7474}.medium{color:#efd46d}.low{color:#61dfac}
+.status{display:inline-block;padding:6px 9px;border-radius:20px;font-size:8px;font-weight:bold}
+.assigned{color:#6eb9ff;background:#6eb9ff10}
+.progress{color:#ffd36b;background:#ffd36b10}
+.resolved{color:#59e1ad;background:#59e1ad10}
+.rejected{color:#ff7e7e;background:#ff7e7e10}
+.status-select{padding:7px;font-size:9px;border-radius:7px;min-width:105px}
+.view{border:1px solid #ffffff12;background:#ffffff07;color:#b9c4d1;padding:7px 9px;border-radius:7px;font-size:9px;cursor:pointer}
+.empty,.loading{text-align:center;padding:40px;color:#718094;font-size:12px}
 .error{
-display:none;
-padding:12px;
-border-radius:10px;
-background:#ff44440d;
-border:1px solid #ff55552a;
-color:#ff9c9c;
-font-size:12px;
-margin:15px 0
+display:none;padding:12px;border-radius:10px;background:#ff44440d;
+border:1px solid #ff55552a;color:#ff9c9c;font-size:12px;margin:15px 0
 }
-
+.success{
+display:none;padding:12px;border-radius:10px;background:#19c9a310;
+border:1px solid #19c9a32a;color:#55e3c2;font-size:12px;margin:15px 0
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grid input,.form-grid select{width:100%}
+.form-actions{margin-top:14px}
+.role-badge{
+display:inline-block;padding:5px 8px;border-radius:20px;
+background:#187de815;color:#70baff;font-size:9px
+}
+.active{color:#59e1ad}.inactive{color:#ff7e7e}
 .modal{
-position:fixed;
-inset:0;
-background:#000b;
-display:none;
-align-items:center;
-justify-content:center;
-padding:18px;
-z-index:100
+position:fixed;inset:0;background:#000b;display:none;
+align-items:center;justify-content:center;padding:18px;z-index:100
 }
-
 .modal-box{
-width:min(700px,100%);
-max-height:90vh;
-overflow:auto;
-background:#0b1927;
-border:1px solid #ffffff14;
-border-radius:20px;
-padding:23px
+width:min(700px,100%);max-height:90vh;overflow:auto;
+background:#0b1927;border:1px solid #ffffff14;border-radius:20px;padding:23px
 }
-
-.modal-head{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px
-}
-
-.modal-head h2{
-font-size:20px
-}
-
-.close{
-border:1px solid #ffffff12;
-background:#ffffff08;
-color:#fff;
-border-radius:8px;
-padding:7px 10px;
-cursor:pointer
-}
-
-.detail{
-margin-bottom:15px
-}
-
-.detail small{
-display:block;
-color:#68778a;
-font-size:9px;
-margin-bottom:5px
-}
-
-.detail p{
-font-size:12px;
-line-height:1.6;
-color:#c4cdd8
-}
-
-footer{
-border-top:1px solid #ffffff0b;
-padding:23px 0;
-text-align:center;
-color:#687688;
-font-size:10px
-}
-
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h2{font-size:20px}
+.close{border:1px solid #ffffff12;background:#ffffff08;color:#fff;border-radius:8px;padding:7px 10px;cursor:pointer}
+.detail{margin-bottom:15px}
+.detail small{display:block;color:#68778a;font-size:9px;margin-bottom:5px}
+.detail p{font-size:12px;line-height:1.6;color:#c4cdd8}
+footer{border-top:1px solid #ffffff0b;padding:23px 0;text-align:center;color:#687688;font-size:10px}
 @media(max-width:700px){
-
-.user-area{
-gap:5px
+.user-area{gap:5px}.department-name{max-width:160px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.stats{grid-template-columns:1fr 1fr}.controls{flex-direction:column}
+select{width:100%}.hero h1{font-size:27px}.form-grid{grid-template-columns:1fr}
 }
-
-.department-name{
-max-width:160px;
-overflow:hidden;
-white-space:nowrap;
-text-overflow:ellipsis
-}
-
-.stats{
-grid-template-columns:1fr 1fr
-}
-
-.controls{
-flex-direction:column
-}
-
-select{
-width:100%
-}
-
-.hero h1{
-font-size:27px
-}
-
-}
-
 @media(max-width:430px){
-
-.stats{
-grid-template-columns:1fr
-}
-
-.logo{
-font-size:15px
-}
-
-.department-name{
-display:none
-}
-
+.stats{grid-template-columns:1fr}.logo{font-size:15px}.department-name{display:none}
 }
 </style>
 </head>
@@ -395,68 +107,109 @@ display:none
 <body>
 
 <nav>
-
 <div class="container nav">
-
 <div class="logo">
 <div class="logo-icon">🏛️</div>
 VCA Department Dashboard
 </div>
-
 <div class="user-area">
-
-<div class="department-name" id="departmentName">
-Checking...
+<div class="department-name" id="departmentName">Checking...</div>
+<button class="logout" onclick="logout()">Logout</button>
 </div>
-
-<button class="logout" onclick="logout()">
-Logout
-</button>
-
 </div>
-
-</div>
-
 </nav>
-
 
 <main class="container">
 
 <section class="hero">
-
 <h1>Department Complaints</h1>
+<p>View, manage and update complaints assigned to your department.</p>
+</section>
 
-<p>
-View, manage and update complaints assigned to your department.
-</p>
+<!-- ADMIN OFFICER MANAGEMENT -->
+<section class="card" id="officerSection" style="display:none">
+
+<div class="card-title">👮 Officer Management</div>
+
+<div class="success" id="officerSuccess"></div>
+<div class="error" id="officerError"></div>
+
+<div class="form-grid">
+
+<input id="officerName" placeholder="Officer name">
+
+<input id="officerUsername" placeholder="Username">
+
+<input id="officerPassword" type="password" placeholder="Password (minimum 8 characters)">
+
+<select id="officerDepartment">
+<option value="">Select Department</option>
+<option value="ROAD">Panchayat / Rural Development</option>
+<option value="WATER">Water Supply Department</option>
+<option value="ELECTRICITY">Electricity Department</option>
+<option value="STREET_LIGHT">Panchayat / Local Body</option>
+<option value="SANITATION">Sanitation Department</option>
+<option value="DRAINAGE">Panchayat / Local Body</option>
+<option value="HEALTH">Public Health Department</option>
+<option value="EDUCATION">Education Department</option>
+<option value="AGRICULTURE">Agriculture Department</option>
+<option value="SAFETY">Police / Public Safety</option>
+<option value="OTHER">Panchayat / Local Administration</option>
+</select>
+
+</div>
+
+<div class="form-actions">
+<button class="btn" onclick="createOfficer()">➕ Create Officer</button>
+</div>
 
 </section>
 
+<!-- OFFICER LIST -->
+<section class="card" id="officerListSection" style="display:none">
 
+<div class="card-title">👥 Registered Officers</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>NAME</th>
+<th>USERNAME</th>
+<th>DEPARTMENT</th>
+<th>ROLE</th>
+<th>STATUS</th>
+<th>ACTION</th>
+</tr>
+</thead>
+<tbody id="officers"></tbody>
+</table>
+</div>
+
+<div class="empty" id="officerEmpty" style="display:none">
+No officers created yet.
+</div>
+
+</section>
+
+<!-- SEARCH -->
 <div class="controls">
 
-<input
-id="search"
-placeholder="🔎 Search complaint ID or problem..."
->
+<input id="search" placeholder="🔎 Search complaint ID or problem...">
 
 <select id="statusFilter">
-
 <option value="">All Status</option>
 <option value="Assigned">Assigned</option>
 <option value="In Progress">In Progress</option>
 <option value="Resolved">Resolved</option>
 <option value="Rejected">Rejected</option>
-
 </select>
 
-<button class="btn" onclick="loadComplaints()">
-↻ Refresh
-</button>
+<button class="btn" onclick="loadComplaints()">↻ Refresh</button>
 
 </div>
 
-
+<!-- STATS -->
 <div class="stats">
 
 <div class="stat">
@@ -481,22 +234,16 @@ placeholder="🔎 Search complaint ID or problem..."
 
 </div>
 
-
 <div class="error" id="error"></div>
 
-
+<!-- COMPLAINT QUEUE -->
 <section class="card">
 
-<div class="card-title">
-📋 Complaint Queue
-</div>
+<div class="card-title">📋 Complaint Queue</div>
 
 <div class="table-wrap">
-
 <table>
-
 <thead>
-
 <tr>
 <th>COMPLAINT ID</th>
 <th>CATEGORY</th>
@@ -505,96 +252,48 @@ placeholder="🔎 Search complaint ID or problem..."
 <th>DATE</th>
 <th>ACTION</th>
 </tr>
-
 </thead>
-
 <tbody id="complaints"></tbody>
-
 </table>
-
 </div>
 
-<div class="loading" id="loading">
-Loading complaints...
-</div>
-
-<div class="empty" id="empty" style="display:none">
-No complaints found.
-</div>
+<div class="loading" id="loading">Loading complaints...</div>
+<div class="empty" id="empty" style="display:none">No complaints found.</div>
 
 </section>
 
 </main>
 
-
+<!-- COMPLAINT MODAL -->
 <div class="modal" id="modal">
-
 <div class="modal-box">
 
 <div class="modal-head">
-
 <h2>Complaint Details</h2>
-
-<button class="close" onclick="closeModal()">
-✕
-</button>
-
+<button class="close" onclick="closeModal()">✕</button>
 </div>
 
-<div class="detail">
-<small>COMPLAINT ID</small>
-<p id="dId">-</p>
-</div>
-
-<div class="detail">
-<small>ORIGINAL COMPLAINT</small>
-<p id="dComplaint">-</p>
-</div>
-
-<div class="detail">
-<small>CATEGORY</small>
-<p id="dCategory">-</p>
-</div>
-
-<div class="detail">
-<small>PRIORITY</small>
-<p id="dPriority">-</p>
-</div>
-
-<div class="detail">
-<small>DEPARTMENT</small>
-<p id="dDepartment">-</p>
-</div>
-
-<div class="detail">
-<small>SUMMARY</small>
-<p id="dSummary">-</p>
-</div>
-
-<div class="detail">
-<small>RECOMMENDED ACTION</small>
-<p id="dAction">-</p>
-</div>
-
-<div class="detail">
-<small>CITIZEN IMPACT</small>
-<p id="dImpact">-</p>
-</div>
-
-<div class="detail">
-<small>SUBMITTED</small>
-<p id="dDate">-</p>
-</div>
+<div class="detail"><small>COMPLAINT ID</small><p id="dId">-</p></div>
+<div class="detail"><small>ORIGINAL COMPLAINT</small><p id="dComplaint">-</p></div>
+<div class="detail"><small>CATEGORY</small><p id="dCategory">-</p></div>
+<div class="detail"><small>PRIORITY</small><p id="dPriority">-</p></div>
+<div class="detail"><small>DEPARTMENT</small><p id="dDepartment">-</p></div>
+<div class="detail"><small>SUMMARY</small><p id="dSummary">-</p></div>
+<div class="detail"><small>RECOMMENDED ACTION</small><p id="dAction">-</p></div>
+<div class="detail"><small>CITIZEN IMPACT</small><p id="dImpact">-</p></div>
+<div class="detail"><small>SUBMITTED</small><p id="dDate">-</p></div>
 
 </div>
-
 </div>
 
+<footer>
+Village Complaint Analyzer • Secure Department System
+</footer>
 
 <script>
 
 let complaints=[];
-
+let currentUser=null;
 
 async function checkLogin(){
 
@@ -603,29 +302,31 @@ try{
 const response=await fetch("/api/me");
 
 if(!response.ok){
-
 window.location.href="/login";
 return;
-
 }
 
 const data=await response.json();
 
 if(!data.authenticated){
-
 window.location.href="/login";
 return;
-
 }
 
-document.getElementById(
-"departmentName"
-).textContent=data.department;
+currentUser=data;
+
+document.getElementById("departmentName").textContent=
+data.department;
+
+if(data.role==="ADMIN"){
+document.getElementById("officerSection").style.display="block";
+document.getElementById("officerListSection").style.display="block";
+loadOfficers();
+}
 
 loadComplaints();
 
-}
-catch{
+}catch(e){
 
 window.location.href="/login";
 
@@ -633,6 +334,158 @@ window.location.href="/login";
 
 }
 
+async function createOfficer(){
+
+const success=document.getElementById("officerSuccess");
+const error=document.getElementById("officerError");
+
+success.style.display="none";
+error.style.display="none";
+
+const name=document.getElementById("officerName").value.trim();
+const username=document.getElementById("officerUsername").value.trim();
+const password=document.getElementById("officerPassword").value;
+const department_code=document.getElementById("officerDepartment").value;
+
+if(!name||!username||!password||!department_code){
+error.textContent="⚠️ Please fill all officer fields.";
+error.style.display="block";
+return;
+}
+
+if(password.length<8){
+error.textContent="⚠️ Password must contain at least 8 characters.";
+error.style.display="block";
+return;
+}
+
+try{
+
+const response=await fetch("/api/admin/officers",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name,
+username,
+password,
+department_code
+})
+});
+
+const data=await response.json();
+
+if(!response.ok){
+throw new Error(data.error||"Unable to create officer.");
+}
+
+success.textContent="✅ Officer account created successfully.";
+success.style.display="block";
+
+document.getElementById("officerName").value="";
+document.getElementById("officerUsername").value="";
+document.getElementById("officerPassword").value="";
+document.getElementById("officerDepartment").value="";
+
+loadOfficers();
+
+}catch(e){
+
+error.textContent="⚠️ "+e.message;
+error.style.display="block";
+
+}
+
+}
+
+async function loadOfficers(){
+
+try{
+
+const response=await fetch("/api/admin/officers");
+
+if(!response.ok)return;
+
+const data=await response.json();
+
+const tbody=document.getElementById("officers");
+const empty=document.getElementById("officerEmpty");
+
+tbody.innerHTML="";
+
+if(!data.length){
+empty.style.display="block";
+return;
+}
+
+empty.style.display="none";
+
+data.forEach(o=>{
+
+const tr=document.createElement("tr");
+
+const status=o.active
+?'<span class="active">● Active</span>'
+:'<span class="inactive">● Disabled</span>';
+
+const action=o.active
+?`<button class="view" onclick="toggleOfficer(${o.id},false)">Disable</button>`
+:`<button class="view" onclick="toggleOfficer(${o.id},true)">Enable</button>`;
+
+tr.innerHTML=`
+<td>${escapeHtml(o.name)}</td>
+<td>${escapeHtml(o.username)}</td>
+<td>${escapeHtml(o.department||o.department_code)}</td>
+<td><span class="role-badge">${escapeHtml(o.role)}</span></td>
+<td>${status}</td>
+<td>${action}</td>
+`;
+
+tbody.appendChild(tr);
+
+});
+
+}catch(e){
+
+console.log(e);
+
+}
+
+}
+
+async function toggleOfficer(id,active){
+
+const action=active?"enable":"disable";
+
+if(!confirm("Are you sure you want to "+action+" this officer?")){
+return;
+}
+
+try{
+
+const response=await fetch(
+"/api/admin/officers/"+id+"/active",
+{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({active})
+}
+);
+
+const data=await response.json();
+
+if(!response.ok){
+throw new Error(data.error||"Update failed.");
+}
+
+loadOfficers();
+
+}catch(e){
+
+alert("Unable to update officer: "+e.message);
+
+}
+
+}
 
 async function loadComplaints(){
 
@@ -646,71 +499,48 @@ error.style.display="none";
 
 try{
 
-const response=await fetch(
-"/api/department"
-);
+const response=await fetch("/api/department");
 
 if(response.status===401){
-
 window.location.href="/login";
 return;
-
 }
 
 const data=await response.json();
 
 if(!response.ok){
-
-throw new Error(
-data.error||"Unable to load complaints."
-);
-
+throw new Error(data.error||"Unable to load complaints.");
 }
 
 complaints=data;
-
 filterComplaints();
 
-}
-catch(e){
+}catch(e){
 
 loading.style.display="none";
-
 error.textContent="⚠️ "+e.message;
-
 error.style.display="block";
 
 }
 
 }
 
-
 function filterComplaints(){
 
-const search=document.getElementById(
-"search"
-).value.toLowerCase().trim();
+const search=document.getElementById("search").value.toLowerCase().trim();
+const status=document.getElementById("statusFilter").value;
 
-const status=document.getElementById(
-"statusFilter"
-).value;
-
-let filtered=complaints.filter(c=>{
+const filtered=complaints.filter(c=>{
 
 const matchesSearch=
-!search ||
-(c.complaint_id||"")
-.toLowerCase().includes(search) ||
-(c.complaint||"")
-.toLowerCase().includes(search) ||
-(c.category||"")
-.toLowerCase().includes(search);
+!search||
+(c.complaint_id||"").toLowerCase().includes(search)||
+(c.complaint||"").toLowerCase().includes(search)||
+(c.category||"").toLowerCase().includes(search);
 
-const matchesStatus=
-!status ||
-c.status===status;
+const matchesStatus=!status||c.status===status;
 
-return matchesSearch && matchesStatus;
+return matchesSearch&&matchesStatus;
 
 });
 
@@ -718,32 +548,20 @@ render(filtered);
 
 }
 
-
 function render(list){
 
-const tbody=document.getElementById(
-"complaints"
-);
-
-const loading=document.getElementById(
-"loading"
-);
-
-const empty=document.getElementById(
-"empty"
-);
+const tbody=document.getElementById("complaints");
+const loading=document.getElementById("loading");
+const empty=document.getElementById("empty");
 
 tbody.innerHTML="";
-
 loading.style.display="none";
 
 updateStats(list);
 
 if(!list.length){
-
 empty.style.display="block";
 return;
-
 }
 
 empty.style.display="none";
@@ -752,76 +570,28 @@ list.forEach(c=>{
 
 const tr=document.createElement("tr");
 
-const priorityClass=
-(c.priority||"Medium").toLowerCase();
-
-const statusClass=
-getStatusClass(c.status);
+const priorityClass=(c.priority||"Medium").toLowerCase();
+const statusClass=getStatusClass(c.status);
 
 tr.innerHTML=`
-
+<td><span class="id">${escapeHtml(c.complaint_id)}</span></td>
+<td>${escapeHtml(c.category||"-")}</td>
+<td><span class="priority ${priorityClass}">${escapeHtml(c.priority||"-")}</span></td>
+<td><span class="status ${statusClass}">${escapeHtml(c.status||"Assigned")}</span></td>
+<td>${escapeHtml(c.created_at||"-")}</td>
 <td>
-<span class="id">
-${escapeHtml(c.complaint_id)}
-</span>
-</td>
+<button class="view" onclick="viewComplaint('${escapeAttr(c.complaint_id)}')">View</button>
 
-<td>
-${escapeHtml(c.category||"-")}
-</td>
-
-<td>
-<span class="priority ${priorityClass}">
-${escapeHtml(c.priority||"-")}
-</span>
-</td>
-
-<td>
-<span class="status ${statusClass}">
-${escapeHtml(c.status||"Assigned")}
-</span>
-</td>
-
-<td>
-${escapeHtml(c.created_at||"-")}
-</td>
-
-<td>
-
-<button
-class="view"
-onclick="viewComplaint('${escapeAttr(c.complaint_id)}')">
-View
-</button>
-
-<select
-class="status-select"
+<select class="status-select"
 onchange="changeStatus('${escapeAttr(c.complaint_id)}',this.value)">
 
 <option value="">Update</option>
-
-<option value="Assigned"
-${c.status==="Assigned"?"selected":""}>
-Assigned
-</option>
-
-<option value="In Progress"
-${c.status==="In Progress"?"selected":""}>
-In Progress
-</option>
-
-<option value="Resolved"
-${c.status==="Resolved"?"selected":""}>
-Resolved
-</option>
-
-<option value="Rejected"
-${c.status==="Rejected"?"selected":""}>
-Rejected
-</option>
+<option value="Assigned">Assigned</option>
+<option value="In Progress">In Progress</option>
+<option value="Resolved">Resolved</option>
+<option value="Rejected">Rejected</option>
 
 </select>
-
 </td>
 `;
 
@@ -831,55 +601,30 @@ tbody.appendChild(tr);
 
 }
 
-
 function updateStats(list){
 
-document.getElementById(
-"total"
-).textContent=list.length;
+document.getElementById("total").textContent=list.length;
 
-document.getElementById(
-"assigned"
-).textContent=
-list.filter(
-c=>c.status==="Assigned"
-).length;
+document.getElementById("assigned").textContent=
+list.filter(c=>c.status==="Assigned").length;
 
-document.getElementById(
-"progress"
-).textContent=
-list.filter(
-c=>c.status==="In Progress"
-).length;
+document.getElementById("progress").textContent=
+list.filter(c=>c.status==="In Progress").length;
 
-document.getElementById(
-"resolved"
-).textContent=
-list.filter(
-c=>c.status==="Resolved"
-).length;
+document.getElementById("resolved").textContent=
+list.filter(c=>c.status==="Resolved").length;
 
 }
-
 
 function getStatusClass(status){
 
-if(status==="In Progress"){
-return "progress";
-}
+if(status==="In Progress")return"progress";
+if(status==="Resolved")return"resolved";
+if(status==="Rejected")return"rejected";
 
-if(status==="Resolved"){
-return "resolved";
-}
-
-if(status==="Rejected"){
-return "rejected";
-}
-
-return "assigned";
+return"assigned";
 
 }
-
 
 async function changeStatus(id,status){
 
@@ -888,127 +633,64 @@ if(!status)return;
 try{
 
 const response=await fetch(
-"/api/complaint/"
-+encodeURIComponent(id)
-+"/status",
+"/api/complaint/"+encodeURIComponent(id)+"/status",
 {
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-status:status
-})
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({status})
 }
 );
 
 const data=await response.json();
 
 if(!response.ok){
-
-throw new Error(
-data.error||"Status update failed."
-);
-
+throw new Error(data.error||"Status update failed.");
 }
 
 await loadComplaints();
 
-}
-catch(e){
+}catch(e){
 
-alert(
-"Unable to update status:\n"
-+e.message
-);
-
+alert("Unable to update status:\n"+e.message);
 await loadComplaints();
 
 }
 
 }
-
 
 function viewComplaint(id){
 
-const c=complaints.find(
-item=>item.complaint_id===id
-);
+const c=complaints.find(x=>x.complaint_id===id);
 
 if(!c)return;
 
-document.getElementById(
-"dId"
-).textContent=c.complaint_id||"-";
+document.getElementById("dId").textContent=c.complaint_id||"-";
+document.getElementById("dComplaint").textContent=c.complaint||"-";
+document.getElementById("dCategory").textContent=c.category||"-";
+document.getElementById("dPriority").textContent=c.priority||"-";
+document.getElementById("dDepartment").textContent=c.department||"-";
+document.getElementById("dSummary").textContent=c.summary||"-";
+document.getElementById("dAction").textContent=c.action||"-";
+document.getElementById("dImpact").textContent=c.impact||"-";
+document.getElementById("dDate").textContent=c.created_at||"-";
 
-document.getElementById(
-"dComplaint"
-).textContent=c.complaint||"-";
-
-document.getElementById(
-"dCategory"
-).textContent=c.category||"-";
-
-document.getElementById(
-"dPriority"
-).textContent=c.priority||"-";
-
-document.getElementById(
-"dDepartment"
-).textContent=c.department||"-";
-
-document.getElementById(
-"dSummary"
-).textContent=c.summary||"-";
-
-document.getElementById(
-"dAction"
-).textContent=c.action||"-";
-
-document.getElementById(
-"dImpact"
-).textContent=c.impact||"-";
-
-document.getElementById(
-"dDate"
-).textContent=c.created_at||"-";
-
-document.getElementById(
-"modal"
-).style.display="flex";
+document.getElementById("modal").style.display="flex";
 
 }
-
 
 function closeModal(){
-
-document.getElementById(
-"modal"
-).style.display="none";
-
+document.getElementById("modal").style.display="none";
 }
-
 
 async function logout(){
 
 try{
-
-await fetch(
-"/api/logout",
-{
-method:"POST"
-}
-);
-
-}
-finally{
-
+await fetch("/api/logout",{method:"POST"});
+}finally{
 window.location.href="/login";
-
 }
 
 }
-
 
 function escapeHtml(value){
 
@@ -1021,7 +703,6 @@ return String(value??"")
 
 }
 
-
 function escapeAttr(value){
 
 return String(value??"")
@@ -1030,38 +711,22 @@ return String(value??"")
 
 }
 
+document.getElementById("search")
+.addEventListener("input",filterComplaints);
 
-document.getElementById(
-"search"
-).addEventListener(
-"input",
-filterComplaints
-);
+document.getElementById("statusFilter")
+.addEventListener("change",filterComplaints);
 
-document.getElementById(
-"statusFilter"
-).addEventListener(
-"change",
-filterComplaints
-);
+document.getElementById("modal")
+.addEventListener("click",function(e){
 
-document.getElementById(
-"modal"
-).addEventListener(
-"click",
-function(e){
+if(e.target===this)closeModal();
 
-if(e.target===this){
-closeModal();
-}
-
-}
-);
-
+});
 
 checkLogin();
 
 </script>
 
 </body>
-  </html>
+</html>
