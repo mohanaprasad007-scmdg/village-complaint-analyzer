@@ -1,3 +1,4 @@
 Flask
 gunicorn
 openai
+psycopg2-binary
