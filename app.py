@@ -145,7 +145,7 @@ upgrade_old_database()
 
 
 # =========================================================
-# ADMIN ENVIRONMENT LOGIN
+# ADMIN LOGIN
 # =========================================================
 
 def admin_credentials():
@@ -164,16 +164,12 @@ def admin_credentials():
 
 def is_admin():
 
-    return (
-        session.get("role") == "ADMIN"
-    )
+    return session.get("role") == "ADMIN"
 
 
 def current_department():
 
-    return session.get(
-        "department_code"
-    )
+    return session.get("department_code")
 
 
 # =========================================================
@@ -307,7 +303,9 @@ def local_analyze(complaint):
             keyword in text
             for keyword in keywords
         ):
+
             department_code = code
+
             break
 
 
@@ -675,10 +673,6 @@ def api_login():
         }), 400
 
 
-    # -----------------------------------------------------
-    # ADMIN LOGIN
-    # -----------------------------------------------------
-
     admin_username, admin_password = (
         admin_credentials()
     )
@@ -718,10 +712,6 @@ def api_login():
             "redirect": "/admin"
         })
 
-
-    # -----------------------------------------------------
-    # OFFICER LOGIN
-    # -----------------------------------------------------
 
     conn = get_db()
 
@@ -890,11 +880,8 @@ def analyze():
     complaint = complaint[:10000]
 
 
-    # -----------------------------------------------------
-    # TRY AI
-    # -----------------------------------------------------
-
     analysis = None
+
 
     if client:
 
@@ -912,10 +899,6 @@ def analyze():
                 repr(e)
             )
 
-
-    # -----------------------------------------------------
-    # LOCAL FALLBACK
-    # -----------------------------------------------------
 
     if not analysis:
 
@@ -983,18 +966,10 @@ def analyze():
 
 
     complaint_id = (
-
         "VCA-"
-
-        + datetime.now().strftime(
-            "%Y%m%d"
-        )
-
+        + datetime.now().strftime("%Y%m%d")
         + "-"
-
-        + uuid.uuid4().hex[
-            :6
-        ].upper()
+        + uuid.uuid4().hex[:6].upper()
     )
 
 
@@ -1025,25 +1000,15 @@ def analyze():
     """, (
 
         complaint_id,
-
         complaint,
-
         category,
-
         priority,
-
         department_code,
-
         department,
-
         summary,
-
         action,
-
         impact,
-
         "Assigned",
-
         created_at
     ))
 
@@ -1091,7 +1056,286 @@ def analyze():
 
 
 # =========================================================
-# TRACK COMPLAINT
+# TRACK SINGLE COMPLAINT
+# =========================================================
+
+@app.route(
+    "/api/complaint/<complaint_id>"
+)
+def track_complaint(complaint_id):
+
+    conn = get_db()
+
+    row = conn.execute("""
+        SELECT
+            complaint_id,
+            complaint,
+            category,
+            priority,
+            department_code,
+            department,
+            summary,
+            action,
+            impact,
+            status,
+            created_at
+        FROM complaints
+        WHERE complaint_id = ?
+    """, (
+        complaint_id,
+    )).fetchone()
+
+    conn.close()
+
+
+    if not row:
+
+        return jsonify({
+                        "error":
+            "Complaint not found."
+        }), 404
+
+
+    return jsonify(
+        dict(row)
+    )
+
+
+# =========================================================
+# DEPARTMENT DASHBOARD COMPLAINTS
+# =========================================================
+
+@app.route(
+    "/api/department"
+)
+def department_complaints():
+
+    if "role" not in session:
+
+        return jsonify({
+            "error":
+            "Authentication required."
+        }), 401
+
+
+    conn = get_db()
+
+
+    if is_admin():
+
+        rows = conn.execute("""
+            SELECT
+                id,
+                complaint_id,
+                complaint,
+                category,
+                priority,
+                department_code,
+                department,
+                summary,
+                action,
+                impact,
+                status,
+                created_at
+            FROM complaints
+            ORDER BY id DESC
+        """).fetchall()
+
+    else:
+
+        department_code = current_department()
+
+        rows = conn.execute("""
+            SELECT
+                id,
+                complaint_id,
+                complaint,
+                category,
+                priority,
+                department_code,
+                department,
+                summary,
+                action,
+                impact,
+                status,
+                created_at
+            FROM complaints
+            WHERE department_code = ?
+            ORDER BY id DESC
+        """, (
+            department_code,
+        )).fetchall()
+
+
+    conn.close()
+
+
+    return jsonify([
+        dict(row)
+        for row in rows
+    ])
+
+
+# =========================================================
+# ADMIN - ALL COMPLAINTS
+# =========================================================
+
+@app.route(
+    "/api/complaints"
+)
+def all_complaints():
+
+    if not is_admin():
+
+        return jsonify({
+            "error":
+            "Administrator access required."
+        }), 403
+
+
+    conn = get_db()
+
+
+    rows = conn.execute("""
+        SELECT
+            id,
+            complaint_id,
+            complaint,
+            category,
+            priority,
+            department_code,
+            department,
+            summary,
+            action,
+            impact,
+            status,
+            created_at
+        FROM complaints
+        ORDER BY id DESC
+    """).fetchall()
+
+
+    conn.close()
+
+
+    return jsonify([
+        dict(row)
+        for row in rows
+    ])
+
+
+# =========================================================
+# UPDATE COMPLAINT STATUS
+# =========================================================
+
+@app.route(
+    "/api/complaint/<complaint_id>/status",
+    methods=["POST"]
+)
+def update_complaint_status(
+    complaint_id
+):
+
+    if "role" not in session:
+
+        return jsonify({
+            "error":
+            "Authentication required."
+        }), 401
+
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+
+    status = str(
+        data.get(
+            "status",
+            ""
+        )
+    ).strip()
+
+
+    allowed_statuses = [
+        "Assigned",
+        "In Progress",
+        "Resolved",
+        "Rejected"
+    ]
+
+
+    if status not in allowed_statuses:
+
+        return jsonify({
+            "error":
+            "Invalid status."
+        }), 400
+
+
+    conn = get_db()
+
+
+    complaint = conn.execute("""
+        SELECT
+            complaint_id,
+            department_code
+        FROM complaints
+        WHERE complaint_id = ?
+    """, (
+        complaint_id,
+    )).fetchone()
+
+
+    if not complaint:
+
+        conn.close()
+
+        return jsonify({
+            "error":
+            "Complaint not found."
+        }), 404
+
+
+    if not is_admin():
+
+        if complaint["department_code"] != current_department():
+
+            conn.close()
+
+            return jsonify({
+                "error":
+                "You cannot update complaints outside your department."
+            }), 403
+
+
+    conn.execute("""
+        UPDATE complaints
+        SET status = ?
+        WHERE complaint_id = ?
+    """, (
+        status,
+        complaint_id
+    ))
+
+
+    conn.commit()
+
+    conn.close()
+
+
+    return jsonify({
+
+        "success": True,
+
+        "complaint_id":
+        complaint_id,
+
+        "status":
+        status
+    })
+
+
 # =========================================================
 # ADMIN - CREATE OFFICER
 # =========================================================
@@ -1226,17 +1470,11 @@ def create_officer():
     """, (
 
         name,
-
         username,
-
         password_hash,
-
         department_code,
-
         "OFFICER",
-
         1,
-
         created_at
     ))
 
@@ -1412,16 +1650,26 @@ def change_officer_active(
 # HEALTH CHECK
 # =========================================================
 
-@app.route("/api/health")
+@app.route(
+    "/api/health"
+)
 def health():
 
     conn = get_db()
+
 
     officer_count = conn.execute("""
         SELECT COUNT(*)
         FROM users
         WHERE active = 1
     """).fetchone()[0]
+
+
+    complaint_count = conn.execute("""
+        SELECT COUNT(*)
+        FROM complaints
+    """).fetchone()[0]
+
 
     conn.close()
 
@@ -1444,7 +1692,10 @@ def health():
         True,
 
         "active_officers":
-        officer_count
+        officer_count,
+
+        "total_complaints":
+        complaint_count
     })
 
 
