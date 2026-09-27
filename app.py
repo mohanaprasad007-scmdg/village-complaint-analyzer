@@ -103,72 +103,112 @@ def get_db():
 # DATABASE SETUP
 # =========================================================
 
-def init_db():
+def upgrade_db():
+
     db = get_db()
 
+    # Add new escalation columns
+    complaint_columns = [
+        ("assigned_role", "TEXT"),
+        ("assigned_user_id", "INTEGER"),
+        ("current_level", "INTEGER"),
+        ("updated_at", "TEXT")
+    ]
+
     if db.pg:
-        db.execute("""
-            CREATE TABLE IF NOT EXISTS complaints (
-                id SERIAL PRIMARY KEY,
-                complaint_id TEXT UNIQUE,
-                complaint TEXT,
-                category TEXT,
-                priority TEXT,
-                department_code TEXT,
-                department TEXT,
-                summary TEXT,
-                action TEXT,
-                impact TEXT,
-                status TEXT,
-                created_at TEXT
-            )
-        """)
 
-        db.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id SERIAL PRIMARY KEY,
-                name TEXT NOT NULL,
-                username TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                department_code TEXT NOT NULL,
-                role TEXT NOT NULL,
-                active INTEGER DEFAULT 1,
-                created_at TEXT
-            )
-        """)
+        for name, typ in complaint_columns:
+
+            try:
+
+                db.execute(
+                    f"""
+                    ALTER TABLE complaints
+                    ADD COLUMN IF NOT EXISTS {name} {typ}
+                    """
+                )
+
+            except Exception as e:
+
+                print(
+                    "Column migration:",
+                    name,
+                    repr(e)
+                )
+
+                db.conn.rollback()
+
     else:
+
+        existing = [
+            row["name"]
+            for row in db.execute(
+                "PRAGMA table_info(complaints)"
+            ).fetchall()
+        ]
+
+        for name, typ in complaint_columns:
+
+            if name not in existing:
+
+                db.execute(
+                    f"""
+                    ALTER TABLE complaints
+                    ADD COLUMN {name} {typ}
+                    """
+                )
+
+
+    # =====================================================
+    # OLD COMPLAINT MIGRATION
+    # =====================================================
+
+    try:
+
+        # Old complaints start at Village Officer
         db.execute("""
-            CREATE TABLE IF NOT EXISTS complaints (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                complaint_id TEXT UNIQUE,
-                complaint TEXT,
-                category TEXT,
-                priority TEXT,
-                department_code TEXT,
-                department TEXT,
-                summary TEXT,
-                action TEXT,
-                impact TEXT,
-                status TEXT,
-                created_at TEXT
-            )
+            UPDATE complaints
+            SET assigned_role = 'VILLAGE_OFFICER'
+            WHERE assigned_role IS NULL
+               OR assigned_role = ''
         """)
 
+        # First hierarchy level
         db.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                username TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL,
-                department_code TEXT NOT NULL,
-                role TEXT NOT NULL,
-                active INTEGER DEFAULT 1,
-                created_at TEXT
-            )
+            UPDATE complaints
+            SET current_level = 1
+            WHERE current_level IS NULL
         """)
+
+        # Preserve existing status
+        db.execute("""
+            UPDATE complaints
+            SET status = 'Assigned'
+            WHERE status IS NULL
+               OR status = ''
+        """)
+
+        # Set update time
+        db.execute("""
+            UPDATE complaints
+            SET updated_at = created_at
+            WHERE updated_at IS NULL
+               OR updated_at = ''
+        """)
+
+    except Exception as e:
+
+        print(
+            "Complaint migration:",
+            repr(e)
+        )
+
+        db.conn.rollback()
+
 
     db.commit()
     db.close()
+    
 
 
 def upgrade_db():
