@@ -7,10 +7,10 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#07111e;color:#f5f7fa}
+body{margin:0;font-family:Arial;background:#07111e;color:#f5f7fa}
 .container{width:min(1200px,94%);margin:auto}
 nav{padding:18px 0;border-bottom:1px solid #ffffff12}
-.nav{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.nav{display:flex;justify-content:space-between;align-items:center}
 .logo{font-size:18px;font-weight:bold}
 .user{display:flex;gap:8px;align-items:center}
 .badge{padding:8px 11px;border-radius:20px;background:#19c9a315;color:#55e3c2;font-size:11px}
@@ -36,14 +36,10 @@ input,select{width:100%;padding:12px;background:#081521;color:#fff;border:1px so
 .controls{display:flex;gap:10px;margin:18px 0}
 .controls input{flex:1}
 .table{overflow:auto}
-table{width:100%;border-collapse:collapse;min-width:1000px}
+table{width:100%;border-collapse:collapse;min-width:1100px}
 th,td{text-align:left;padding:12px;border-bottom:1px solid #ffffff0c;font-size:11px}
 th{font-size:9px;color:#718094}
 .id{color:#55e3c2;font-weight:bold}
-.high{color:#ffbd62}
-.emergency{color:#ff7474}
-.medium{color:#efd46d}
-.low{color:#61dfac}
 .role{padding:5px 8px;border-radius:20px;background:#187de815;color:#70baff;font-size:9px}
 .active{color:#59e1ad}
 .inactive{color:#ff7e7e}
@@ -52,13 +48,23 @@ th{font-size:9px;color:#718094}
 .progress{color:#ffd36b;background:#ffd36b10}
 .resolved{color:#59e1ad;background:#59e1ad10}
 .rejected{color:#ff7e7e;background:#ff7e7e10}
-.empty{text-align:center;padding:30px;color:#718094}
 .level{color:#b794ff;font-size:10px}
+.high{color:#ffbd62}
+.emergency{color:#ff7474}
+.medium{color:#efd46d}
+.low{color:#61dfac}
+.empty{text-align:center;padding:30px;color:#718094}
 .modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:15px}
 .modalbox{width:min(700px,100%);max-height:90vh;overflow:auto;background:#0b1927;padding:22px;border-radius:18px}
 .detail{margin:13px 0}
 .detail small{display:block;color:#68778a;font-size:9px}
 .detail p{line-height:1.5;color:#c4cdd8}
+
+@media(max-width:700px){
+.grid{grid-template-columns:1fr}
+.stats{grid-template-columns:repeat(2,1fr)}
+.controls{flex-direction:column}
+}
 </style>
 </head>
 
@@ -66,25 +72,26 @@ th{font-size:9px;color:#718094}
 
 <nav>
 <div class="container nav">
+
 <div class="logo">🏛️ VCA Government Dashboard</div>
 
 <div class="user">
 <span class="badge" id="userInfo">Loading...</span>
 <button class="logout" onclick="logout()">Logout</button>
 </div>
+
 </div>
 </nav>
-
 
 <main class="container">
 
 <section class="hero">
 <h1>Government Complaint Dashboard</h1>
-<p>Manage complaints according to government department and officer level.</p>
+<p>Manage complaints according to department, officer level and location.</p>
 </section>
 
 
-<!-- ADMIN OFFICER CREATION -->
+<!-- CREATE OFFICER -->
 
 <section class="card" id="officerSection" style="display:none">
 
@@ -99,9 +106,11 @@ th{font-size:9px;color:#718094}
 
 <input id="username" placeholder="Username">
 
-<input id="password"
+<input
+id="password"
 type="password"
-placeholder="Password (minimum 8 characters)">
+placeholder="Password (minimum 8 characters)"
+>
 
 <select id="role">
 
@@ -188,12 +197,24 @@ Panchayat / Local Administration
 
 </select>
 
+<!-- LOCATION -->
+
+<input id="district" placeholder="District">
+
+<input id="taluk" placeholder="Taluk">
+
+<input id="block" placeholder="Block">
+
+<input id="village" placeholder="Village / Panchayat">
+
 </div>
 
 <div class="actions">
+
 <button class="btn" onclick="createOfficer()">
 ➕ Create Officer
 </button>
+
 </div>
 
 </section>
@@ -215,6 +236,10 @@ Panchayat / Local Administration
 <th>USERNAME</th>
 <th>LEVEL</th>
 <th>DEPARTMENT</th>
+<th>DISTRICT</th>
+<th>TALUK</th>
+<th>BLOCK</th>
+<th>VILLAGE</th>
 <th>STATUS</th>
 <th>ACTION</th>
 </tr>
@@ -239,7 +264,8 @@ No officers created yet.
 
 <input
 id="search"
-placeholder="🔎 Search complaint ID or problem">
+placeholder="🔎 Search complaint ID or problem"
+>
 
 <select id="filter">
 
@@ -289,9 +315,7 @@ placeholder="🔎 Search complaint ID or problem">
 
 <section class="card">
 
-<div class="title">
-📋 Complaint Queue
-</div>
+<div class="title">📋 Complaint Queue</div>
 
 <div class="table">
 
@@ -305,6 +329,7 @@ placeholder="🔎 Search complaint ID or problem">
 <th>PRIORITY</th>
 <th>LEVEL</th>
 <th>STATUS</th>
+<th>LOCATION</th>
 <th>DATE</th>
 <th>ACTION</th>
 </tr>
@@ -326,15 +351,13 @@ No complaints found.
 </main>
 
 
-<!-- DETAILS MODAL -->
+<!-- MODAL -->
 
 <div class="modal" id="modal">
 
 <div class="modalbox">
 
-<button class="view" onclick="closeModal()">
-✕ Close
-</button>
+<button class="view" onclick="closeModal()">✕ Close</button>
 
 <h2>Complaint Details</h2>
 
@@ -364,8 +387,13 @@ No complaints found.
 </div>
 
 <div class="detail">
-<small>CURRENT GOVERNMENT LEVEL</small>
+<small>GOVERNMENT LEVEL</small>
 <p id="dLevel"></p>
+</div>
+
+<div class="detail">
+<small>LOCATION</small>
+<p id="dLocation"></p>
 </div>
 
 <div class="detail">
@@ -408,8 +436,10 @@ async function checkLogin(){
 const r=await fetch("/api/me");
 
 if(!r.ok){
+
 location.href="/login";
 return;
+
 }
 
 currentUser=await r.json();
@@ -422,9 +452,11 @@ document.getElementById("userInfo").textContent=
 
 if(currentUser.role==="ADMIN"){
 
-document.getElementById("officerSection").style.display="block";
+document.getElementById("officerSection")
+.style.display="block";
 
-document.getElementById("officerListSection").style.display="block";
+document.getElementById("officerListSection")
+.style.display="block";
 
 loadOfficers();
 
@@ -438,11 +470,9 @@ loadComplaints();
 async function createOfficer(){
 
 const error=document.getElementById("error");
-
 const success=document.getElementById("success");
 
 error.style.display="none";
-
 success.style.display="none";
 
 
@@ -456,7 +486,20 @@ password:document.getElementById("password").value,
 
 role:document.getElementById("role").value,
 
-department_code:document.getElementById("department").value
+department_code:
+document.getElementById("department").value,
+
+district:
+document.getElementById("district").value.trim(),
+
+taluk:
+document.getElementById("taluk").value.trim(),
+
+block:
+document.getElementById("block").value.trim(),
+
+village:
+document.getElementById("village").value.trim()
 
 };
 
@@ -469,10 +512,8 @@ if(
 !data.department_code
 ){
 
-error.textContent="Please fill all fields.";
-
+error.textContent="Please fill all required fields.";
 error.style.display="block";
-
 return;
 
 }
@@ -484,7 +525,6 @@ error.textContent=
 "Password must contain at least 8 characters.";
 
 error.style.display="block";
-
 return;
 
 }
@@ -512,7 +552,6 @@ result.error||
 "Unable to create officer.";
 
 error.style.display="block";
-
 return;
 
 }
@@ -526,9 +565,20 @@ result.role_name+
 success.style.display="block";
 
 
-["name","username","password","role","department"]
-.forEach(id=>{
+[
+"name",
+"username",
+"password",
+"role",
+"department",
+"district",
+"taluk",
+"block",
+"village"
+].forEach(id=>{
+
 document.getElementById(id).value="";
+
 });
 
 
@@ -546,7 +596,6 @@ if(!r.ok)return;
 const data=await r.json();
 
 const tbody=document.getElementById("officers");
-
 const empty=document.getElementById("officerEmpty");
 
 tbody.innerHTML="";
@@ -555,11 +604,9 @@ tbody.innerHTML="";
 if(!data.length){
 
 empty.style.display="block";
-
 return;
 
 }
-
 
 empty.style.display="none";
 
@@ -580,9 +627,15 @@ ${esc(o.role_name||o.role)}
 </span>
 </td>
 
-<td>
-${esc(o.department||o.department_code)}
-</td>
+<td>${esc(o.department||o.department_code)}</td>
+
+<td>${esc(o.district||"-")}</td>
+
+<td>${esc(o.taluk||"-")}</td>
+
+<td>${esc(o.block||"-")}</td>
+
+<td>${esc(o.village||"-")}</td>
 
 <td class="${o.active?'active':'inactive'}">
 ${o.active?'● Active':'● Disabled'}
@@ -643,7 +696,6 @@ const r=await fetch("/api/department");
 if(!r.ok){
 
 location.href="/login";
-
 return;
 
 }
@@ -659,8 +711,7 @@ function render(){
 
 const search=
 document.getElementById("search")
-.value
-.toLowerCase();
+.value.toLowerCase();
 
 const filter=
 document.getElementById("filter")
@@ -690,37 +741,29 @@ return s&&(!filter||c.status===filter);
 });
 
 
-document.getElementById("total")
-.textContent=list.length;
+document.getElementById("total").textContent=list.length;
 
-document.getElementById("assigned")
-.textContent=
+document.getElementById("assigned").textContent=
 list.filter(c=>c.status==="Assigned").length;
 
-document.getElementById("progress")
-.textContent=
+document.getElementById("progress").textContent=
 list.filter(c=>c.status==="In Progress").length;
 
-document.getElementById("resolved")
-.textContent=
+document.getElementById("resolved").textContent=
 list.filter(c=>c.status==="Resolved").length;
 
 
-const tbody=
-document.getElementById("complaints");
+const tbody=document.getElementById("complaints");
 
 tbody.innerHTML="";
 
-
-document.getElementById("empty")
-.style.display=
+document.getElementById("empty").style.display=
 list.length?"none":"block";
 
 
 list.forEach(c=>{
 
 const tr=document.createElement("tr");
-
 
 const sc=
 c.status==="In Progress"
@@ -732,17 +775,21 @@ c.status==="Rejected"
 "assigned";
 
 
+const location=[
+c.district,
+c.taluk,
+c.block,
+c.village
+].filter(Boolean).join(" / ")||"-";
+
+
 tr.innerHTML=`
 
 <td>
-<span class="id">
-${esc(c.complaint_id)}
-</span>
+<span class="id">${esc(c.complaint_id)}</span>
 </td>
 
-<td>
-${esc(c.category||"-")}
-</td>
+<td>${esc(c.category||"-")}</td>
 
 <td class="${(c.priority||"").toLowerCase()}">
 ${esc(c.priority||"-")}
@@ -764,9 +811,9 @@ ${esc(c.status||"Assigned")}
 </span>
 </td>
 
-<td>
-${esc(c.created_at||"-")}
-</td>
+<td>${esc(location)}</td>
+
+<td>${esc(c.created_at||"-")}</td>
 
 <td>
 
@@ -779,16 +826,10 @@ View
 <select
 onchange="changeStatus('${attr(c.complaint_id)}',this.value)">
 
-<option value="">
-Update
-</option>
-
+<option value="">Update</option>
 <option>Assigned</option>
-
 <option>In Progress</option>
-
 <option>Resolved</option>
-
 <option>Rejected</option>
 
 </select>
@@ -818,9 +859,7 @@ tbody.appendChild(tr);
 function canEscalate(c){
 
 if(currentUser?.role==="ADMIN"){
-
 return false;
-
 }
 
 return c.assigned_role===currentUser?.role;
@@ -855,11 +894,7 @@ const data=await r.json();
 
 if(!r.ok){
 
-alert(
-data.error||
-"Escalation failed."
-);
-
+alert(data.error||"Escalation failed.");
 return;
 
 }
@@ -869,7 +904,6 @@ alert(
 "✅ Escalated to "+
 (data.new_role_name||"next level")
 );
-
 
 loadComplaints();
 
@@ -890,9 +924,7 @@ method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify({
-status
-})
+body:JSON.stringify({status})
 }
 );
 
@@ -902,13 +934,9 @@ const data=await r.json();
 
 if(!r.ok){
 
-alert(
-data.error||
-"Status update failed."
-);
+alert(data.error||"Status update failed.");
 
 }
-
 
 loadComplaints();
 
@@ -917,50 +945,59 @@ loadComplaints();
 
 function viewComplaint(id){
 
-const c=
-complaints.find(
+const c=complaints.find(
 x=>x.complaint_id===id
 );
 
 if(!c)return;
 
 
-document.getElementById("dId")
-.textContent=c.complaint_id||"-";
+document.getElementById("dId").textContent=
+c.complaint_id||"-";
 
-document.getElementById("dComplaint")
-.textContent=c.complaint||"-";
+document.getElementById("dComplaint").textContent=
+c.complaint||"-";
 
-document.getElementById("dCategory")
-.textContent=c.category||"-";
+document.getElementById("dCategory").textContent=
+c.category||"-";
 
-document.getElementById("dPriority")
-.textContent=c.priority||"-";
+document.getElementById("dPriority").textContent=
+c.priority||"-";
 
-document.getElementById("dDepartment")
-.textContent=c.department||"-";
+document.getElementById("dDepartment").textContent=
+c.department||"-";
 
-document.getElementById("dLevel")
-.textContent=
+document.getElementById("dLevel").textContent=
 c.assigned_role_name||
 c.assigned_role||
 "-";
 
-document.getElementById("dStatus")
-.textContent=
+
+const location=[
+c.district,
+c.taluk,
+c.block,
+c.village
+].filter(Boolean).join(" / ")||"-";
+
+
+document.getElementById("dLocation").textContent=
+location;
+
+document.getElementById("dStatus").textContent=
 c.status||"-";
 
-document.getElementById("dSummary")
-.textContent=c.summary||"-";
+document.getElementById("dSummary").textContent=
+c.summary||"-";
 
-document.getElementById("dAction")
-.textContent=c.action||"-";
+document.getElementById("dAction").textContent=
+c.action||"-";
 
-document.getElementById("dImpact")
-.textContent=c.impact||"-";
+document.getElementById("dImpact").textContent=
+c.impact||"-";
 
-document.getElementById("dDate")
-.textContent=c.created_at||"-";
+document.getElementById("dDate").textContent=
+c.created_at||"-";
 
 
 document.getElementById("modal")
@@ -1012,21 +1049,11 @@ return String(v??"")
 }
 
 
-document
-.getElementById("search")
-.addEventListener(
-"input",
-render
-);
+document.getElementById("search")
+.addEventListener("input",render);
 
-
-document
-.getElementById("filter")
-.addEventListener(
-"change",
-render
-);
-
+document.getElementById("filter")
+.addEventListener("change",render);
 
 checkLogin();
 
