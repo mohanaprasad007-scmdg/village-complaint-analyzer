@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TN Government - Citizen Complaint</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f6f8;
+    color:#222;
+}
+.header{
+    background:#123b6d;
+    color:white;
+    padding:20px;
+    text-align:center;
+}
+.container{
+    max-width:800px;
+    margin:30px auto;
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 3px 15px #0002;
+}
+h2{color:#123b6d}
+label{
+    display:block;
+    margin-top:16px;
+    font-weight:bold;
+}
+input,select,textarea{
+    width:100%;
+    padding:12px;
+    margin-top:7px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:15px;
+}
+textarea{height:120px;resize:vertical}
+button{
+    margin-top:25px;
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:6px;
+    background:#123b6d;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+button:hover{background:#0b2b50}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Tamil Nadu Government</h1>
+    <p>Village Complaint Management System</p>
+</div>
+
+<div class="container">
+
+<h2>Submit a Complaint</h2>
+
+<form id="complaintForm">
+
+<label>Citizen Name</label>
+<input type="text" id="name" required>
+
+<label>Mobile Number</label>
+<input type="tel" id="mobile" pattern="[0-9]{10}" required>
+
+<label>District</label>
+<select id="district" required>
+    <option value="">Select District</option>
+    <option>Chennai</option>
+    <option>Tiruvannamalai</option>
+    <option>Vellore</option>
+    <option>Kanchipuram</option>
+    <option>Coimbatore</option>
+    <option>Madurai</option>
+    <option>Salem</option>
+    <option>Trichy</option>
+    <option>Tirunelveli</option>
+</select>
+
+<label>Taluk</label>
+<input type="text" id="taluk" required>
+
+<label>Block</label>
+<input type="text" id="block" required>
+
+<label>Village / Panchayat</label>
+<input type="text" id="village" required>
+
+<label>Complaint Department</label>
+<select id="department" required>
+    <option value="">Select Department</option>
+    <option>Water Supply & Sewerage</option>
+    <option>Roads & Highways</option>
+    <option>Electricity & Street Lighting</option>
+    <option>Sanitation & Solid Waste</option>
+    <option>Public Health</option>
+    <option>School Education</option>
+    <option>Agriculture</option>
+    <option>Revenue & Land</option>
+    <option>Rural Development & Panchayats</option>
+    <option>Housing</option>
+    <option>Transport</option>
+    <option>Social Welfare</option>
+    <option>Animal Husbandry</option>
+    <option>Environment</option>
+    <option>Food & Civil Supplies</option>
+    <option>Other Government Services</option>
+</select>
+
+<label>Complaint Description</label>
+<textarea id="description"
+placeholder="Describe your complaint clearly..." required></textarea>
+
+<label>Upload Photo (Optional)</label>
+<input type="file" id="photo" accept="image/*">
+
+<button type="submit">Submit Complaint</button>
+
+</form>
+
+</div>
+
+<script>
+document.getElementById("complaintForm").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const id = "TN-VCA-" + Date.now();
+
+    alert(
+        "Complaint submitted successfully!\n\n" +
+        "Complaint ID: " + id
+    );
+
+    this.reset();
+});
+</script>
+
+</body>
+</html>
