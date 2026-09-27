@@ -1391,39 +1391,29 @@ def track(complaint_id):
 # =========================================================
 
 @app.route("/api/department")
-def department():
+def department_complaints():
 
-    if "role" not in session:
-
+    if not session.get("user_id"):
         return jsonify({
-            "error":
-                "Authentication required."
+            "error": "Login required."
         }), 401
 
     db = get_db()
 
-    if is_admin():
+    user_id = session.get("user_id")
+    role = session.get("role")
+    department_code = session.get("department_code")
 
-        rows = db.execute("""
-            SELECT *
-            FROM complaints
-            ORDER BY id DESC
-        """).fetchall()
-
-    else:
-
-        role = current_role()
-
-        rows = db.execute("""
-            SELECT *
-            FROM complaints
-            WHERE department_code = ?
-              AND assigned_role = ?
-            ORDER BY id DESC
-        """, (
-            current_department(),
-            role
-        )).fetchall()
+    rows = db.execute("""
+        SELECT *
+        FROM complaints
+        WHERE department_code = ?
+          AND assigned_role = ?
+        ORDER BY id DESC
+    """, (
+        department_code,
+        role
+    )).fetchall()
 
     db.close()
 
@@ -1431,27 +1421,66 @@ def department():
 
     for row in rows:
 
-        item = dict(row)
+        complaint = dict(row)
 
-        item[
-            "assigned_role_name"
-        ] = ROLE_NAMES.get(
-            item.get(
-                "assigned_role"
-            ),
-            item.get(
-                "assigned_role"
-            )
+        # Location filtering
+        if role == "VILLAGE_OFFICER":
+
+            if (
+                complaint.get("district") !=
+                session.get("district")
+                or complaint.get("taluk") !=
+                session.get("taluk")
+                or complaint.get("block") !=
+                session.get("block")
+                or complaint.get("village") !=
+                session.get("village")
+            ):
+                continue
+
+        elif role == "BLOCK_OFFICER":
+
+            if (
+                complaint.get("district") !=
+                session.get("district")
+                or complaint.get("taluk") !=
+                session.get("taluk")
+                or complaint.get("block") !=
+                session.get("block")
+            ):
+                continue
+
+        elif role == "TALUK_OFFICER":
+
+            if (
+                complaint.get("district") !=
+                session.get("district")
+                or complaint.get("taluk") !=
+                session.get("taluk")
+            ):
+                continue
+
+        elif role == "DISTRICT_OFFICER":
+
+            if (
+                complaint.get("district") !=
+                session.get("district")
+            ):
+                continue
+
+        # Add readable role name
+        assigned_role = complaint.get(
+            "assigned_role"
         )
 
-        result.append(item)
+        complaint["assigned_role_name"] = ROLE_NAMES.get(
+            assigned_role,
+            assigned_role
+        )
+
+        result.append(complaint)
 
     return jsonify(result)
-
-
-# =========================================================
-# ALL COMPLAINTS
-# =========================================================
 
 @app.route("/api/complaints")
 def complaints():
