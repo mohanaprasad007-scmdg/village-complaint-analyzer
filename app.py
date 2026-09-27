@@ -768,7 +768,9 @@ def home():
         "index.html"
     )
 
-
+@app.route("/citizen")
+def citizen():
+    return send_from_directory(".", "citizen.html")
 @app.route("/login")
 def login():
 
