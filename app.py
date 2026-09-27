@@ -1426,46 +1426,48 @@ def create_officer():
 
     if not is_admin():
         return jsonify({
-            "error":
-            "Administrator access required."
+            "error": "Administrator access required."
         }), 403
 
-    data = request.get_json(
-        silent=True
-    ) or {}
+    data = request.get_json(silent=True) or {}
 
-    name = str(
-        data.get("name", "")
-    ).strip()
+    name = str(data.get("name", "")).strip()
+    username = str(data.get("username", "")).strip().lower()
+    password = str(data.get("password", ""))
+    code = str(data.get("department_code", "")).strip().upper()
 
-    username = str(
-        data.get("username", "")
-    ).strip().lower()
-
-    password = str(
-        data.get("password", "")
-    )
-
-    code = str(
-        data.get("department_code", "")
+    role = str(
+        data.get("role", "DEPARTMENT_OFFICER")
     ).strip().upper()
+
+    allowed_roles = [
+        "VILLAGE_OFFICER",
+        "BLOCK_OFFICER",
+        "TALUK_OFFICER",
+        "DISTRICT_OFFICER",
+        "DEPARTMENT_OFFICER",
+        "DEPARTMENT_HEAD",
+        "STATE_ADMINISTRATOR"
+    ]
 
     if not name or not username:
         return jsonify({
-            "error":
-            "Name and username are required."
+            "error": "Name and username are required."
         }), 400
 
     if len(password) < 8:
         return jsonify({
-            "error":
-            "Password must contain at least 8 characters."
+            "error": "Password must contain at least 8 characters."
         }), 400
 
     if code not in DEPARTMENTS:
         return jsonify({
-            "error":
-            "Invalid department."
+            "error": "Invalid department."
+        }), 400
+
+    if role not in allowed_roles:
+        return jsonify({
+            "error": "Invalid officer level."
         }), 400
 
     db = get_db()
@@ -1478,8 +1480,7 @@ def create_officer():
     if existing:
         db.close()
         return jsonify({
-            "error":
-            "Username already exists."
+            "error": "Username already exists."
         }), 409
 
     db.execute("""
@@ -1499,11 +1500,9 @@ def create_officer():
         username,
         generate_password_hash(password),
         code,
-        "OFFICER",
+        role,
         1,
-        datetime.now().strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     ))
 
     db.commit()
@@ -1511,13 +1510,12 @@ def create_officer():
 
     return jsonify({
         "success": True,
-        "message":
-        "Officer account created.",
+        "message": "Officer account created.",
         "name": name,
         "username": username,
+        "role": role,
         "department_code": code,
-        "department":
-        DEPARTMENTS[code]["name"]
+        "department": DEPARTMENTS[code]["name"]
     })
 
 
