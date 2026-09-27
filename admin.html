@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VCA Government Dashboard</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#07111e;color:#f5f7fa}
@@ -16,49 +17,64 @@ nav{padding:18px 0;border-bottom:1px solid #ffffff12}
 button{border:0;border-radius:9px;padding:10px 14px;cursor:pointer}
 .btn{background:linear-gradient(135deg,#19bd9a,#187de8);color:white;font-weight:bold}
 .logout,.view{background:#ffffff08;color:#c8d0da;border:1px solid #ffffff12}
+.escalate{background:#8b5cf6;color:white;font-weight:bold}
 .hero{padding:30px 0 15px}
-.hero h1{margin:0 0 8px}.hero p{color:#8491a3;font-size:13px}
+.hero h1{margin:0 0 8px}
+.hero p{color:#8491a3;font-size:13px}
 .card{background:#ffffff08;border:1px solid #ffffff10;border-radius:18px;padding:20px;margin:18px 0}
 .title{font-size:17px;font-weight:bold;margin-bottom:15px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 input,select{width:100%;padding:12px;background:#081521;color:#fff;border:1px solid #ffffff15;border-radius:9px}
 .actions{margin-top:14px}
 .success,.error{display:none;padding:11px;border-radius:9px;margin-bottom:12px;font-size:12px}
-.success{background:#19c9a315;color:#55e3c2}.error{background:#ff444415;color:#ff9c9c}
+.success{background:#19c9a315;color:#55e3c2}
+.error{background:#ff444415;color:#ff9c9c}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .stat{background:#ffffff08;border:1px solid #ffffff10;border-radius:15px;padding:18px}
-.stat small{display:block;color:#718094;font-size:9px;margin-bottom:7px}.stat strong{font-size:24px}
-.controls{display:flex;gap:10px;margin:18px 0}.controls input{flex:1}
+.stat small{display:block;color:#718094;font-size:9px;margin-bottom:7px}
+.stat strong{font-size:24px}
+.controls{display:flex;gap:10px;margin:18px 0}
+.controls input{flex:1}
 .table{overflow:auto}
-table{width:100%;border-collapse:collapse;min-width:850px}
+table{width:100%;border-collapse:collapse;min-width:1000px}
 th,td{text-align:left;padding:12px;border-bottom:1px solid #ffffff0c;font-size:11px}
 th{font-size:9px;color:#718094}
 .id{color:#55e3c2;font-weight:bold}
-.high{color:#ffbd62}.emergency{color:#ff7474}.medium{color:#efd46d}.low{color:#61dfac}
+.high{color:#ffbd62}
+.emergency{color:#ff7474}
+.medium{color:#efd46d}
+.low{color:#61dfac}
 .role{padding:5px 8px;border-radius:20px;background:#187de815;color:#70baff;font-size:9px}
-.active{color:#59e1ad}.inactive{color:#ff7e7e}
+.active{color:#59e1ad}
+.inactive{color:#ff7e7e}
 .status{padding:5px 8px;border-radius:20px;font-size:9px}
-.assigned{color:#6eb9ff;background:#6eb9ff10}.progress{color:#ffd36b;background:#ffd36b10}
-.resolved{color:#59e1ad;background:#59e1ad10}.rejected{color:#ff7e7e;background:#ff7e7e10}
+.assigned{color:#6eb9ff;background:#6eb9ff10}
+.progress{color:#ffd36b;background:#ffd36b10}
+.resolved{color:#59e1ad;background:#59e1ad10}
+.rejected{color:#ff7e7e;background:#ff7e7e10}
 .empty{text-align:center;padding:30px;color:#718094}
+.level{color:#b794ff;font-size:10px}
 .modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:15px}
 .modalbox{width:min(700px,100%);max-height:90vh;overflow:auto;background:#0b1927;padding:22px;border-radius:18px}
-.detail{margin:13px 0}.detail small{display:block;color:#68778a;font-size:9px}.detail p{line-height:1.5;color:#c4cdd8}
-@media(max-width:700px){.grid,.stats{grid-template-columns:1fr 1fr}.controls{flex-direction:column}}
-@media(max-width:430px){.grid,.stats{grid-template-columns:1fr}.badge{display:none}}
+.detail{margin:13px 0}
+.detail small{display:block;color:#68778a;font-size:9px}
+.detail p{line-height:1.5;color:#c4cdd8}
 </style>
 </head>
+
 <body>
 
 <nav>
 <div class="container nav">
 <div class="logo">🏛️ VCA Government Dashboard</div>
+
 <div class="user">
 <span class="badge" id="userInfo">Loading...</span>
 <button class="logout" onclick="logout()">Logout</button>
 </div>
 </div>
 </nav>
+
 
 <main class="container">
 
@@ -67,298 +83,954 @@ th{font-size:9px;color:#718094}
 <p>Manage complaints according to government department and officer level.</p>
 </section>
 
+
+<!-- ADMIN OFFICER CREATION -->
+
 <section class="card" id="officerSection" style="display:none">
+
 <div class="title">👮 Create Government Officer</div>
 
 <div class="success" id="success"></div>
 <div class="error" id="error"></div>
 
 <div class="grid">
+
 <input id="name" placeholder="Officer name">
+
 <input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password (minimum 8 characters)">
+
+<input id="password"
+type="password"
+placeholder="Password (minimum 8 characters)">
 
 <select id="role">
+
 <option value="">Select Officer Level</option>
-<option value="VILLAGE_OFFICER">Village / Panchayat Officer</option>
-<option value="BLOCK_OFFICER">Block Officer</option>
-<option value="TALUK_OFFICER">Taluk Officer</option>
-<option value="DISTRICT_OFFICER">District Officer</option>
-<option value="DEPARTMENT_OFFICER">Department Officer</option>
-<option value="DEPARTMENT_HEAD">Department Head</option>
-<option value="STATE_ADMINISTRATOR">State Administrator</option>
+
+<option value="VILLAGE_OFFICER">
+Village / Panchayat Officer
+</option>
+
+<option value="BLOCK_OFFICER">
+Block Officer
+</option>
+
+<option value="TALUK_OFFICER">
+Taluk Officer
+</option>
+
+<option value="DISTRICT_OFFICER">
+District Officer
+</option>
+
+<option value="DEPARTMENT_OFFICER">
+Department Officer
+</option>
+
+<option value="DEPARTMENT_HEAD">
+Department Head
+</option>
+
+<option value="STATE_ADMINISTRATOR">
+State Administrator
+</option>
+
 </select>
 
+
 <select id="department">
+
 <option value="">Select Department</option>
-<option value="ROAD">Panchayat / Rural Development</option>
-<option value="WATER">Water Supply Department</option>
-<option value="ELECTRICITY">Electricity Department</option>
-<option value="STREET_LIGHT">Panchayat / Local Body</option>
-<option value="SANITATION">Sanitation Department</option>
-<option value="DRAINAGE">Panchayat / Local Body</option>
-<option value="HEALTH">Public Health Department</option>
-<option value="EDUCATION">Education Department</option>
-<option value="AGRICULTURE">Agriculture Department</option>
-<option value="SAFETY">Police / Public Safety</option>
-<option value="OTHER">Panchayat / Local Administration</option>
+
+<option value="ROAD">
+Panchayat / Rural Development
+</option>
+
+<option value="WATER">
+Water Supply Department
+</option>
+
+<option value="ELECTRICITY">
+Electricity Department
+</option>
+
+<option value="STREET_LIGHT">
+Panchayat / Local Body
+</option>
+
+<option value="SANITATION">
+Sanitation Department
+</option>
+
+<option value="DRAINAGE">
+Panchayat / Local Body
+</option>
+
+<option value="HEALTH">
+Public Health Department
+</option>
+
+<option value="EDUCATION">
+Education Department
+</option>
+
+<option value="AGRICULTURE">
+Agriculture Department
+</option>
+
+<option value="SAFETY">
+Police / Public Safety
+</option>
+
+<option value="OTHER">
+Panchayat / Local Administration
+</option>
+
 </select>
+
 </div>
 
 <div class="actions">
-<button class="btn" onclick="createOfficer()">➕ Create Officer</button>
+<button class="btn" onclick="createOfficer()">
+➕ Create Officer
+</button>
 </div>
+
 </section>
+
+
+<!-- OFFICER LIST -->
 
 <section class="card" id="officerListSection" style="display:none">
+
 <div class="title">👥 Government Officers</div>
+
 <div class="table">
+
 <table>
-<thead><tr><th>NAME</th><th>USERNAME</th><th>LEVEL</th><th>DEPARTMENT</th><th>STATUS</th><th>ACTION</th></tr></thead>
+
+<thead>
+<tr>
+<th>NAME</th>
+<th>USERNAME</th>
+<th>LEVEL</th>
+<th>DEPARTMENT</th>
+<th>STATUS</th>
+<th>ACTION</th>
+</tr>
+</thead>
+
 <tbody id="officers"></tbody>
+
 </table>
+
 </div>
-<div class="empty" id="officerEmpty">No officers created yet.</div>
+
+<div class="empty" id="officerEmpty">
+No officers created yet.
+</div>
+
 </section>
 
+
+<!-- SEARCH -->
+
 <div class="controls">
-<input id="search" placeholder="🔎 Search complaint ID or problem">
+
+<input
+id="search"
+placeholder="🔎 Search complaint ID or problem">
+
 <select id="filter">
+
 <option value="">All Status</option>
 <option>Assigned</option>
 <option>In Progress</option>
 <option>Resolved</option>
 <option>Rejected</option>
+
 </select>
-<button class="btn" onclick="loadComplaints()">↻ Refresh</button>
+
+<button class="btn" onclick="loadComplaints()">
+↻ Refresh
+</button>
+
 </div>
+
+
+<!-- STATS -->
 
 <div class="stats">
-<div class="stat"><small>TOTAL COMPLAINTS</small><strong id="total">0</strong></div>
-<div class="stat"><small>ASSIGNED</small><strong id="assigned">0</strong></div>
-<div class="stat"><small>IN PROGRESS</small><strong id="progress">0</strong></div>
-<div class="stat"><small>RESOLVED</small><strong id="resolved">0</strong></div>
+
+<div class="stat">
+<small>TOTAL COMPLAINTS</small>
+<strong id="total">0</strong>
 </div>
 
-<section class="card">
-<div class="title">📋 Complaint Queue</div>
-<div class="table">
-<table>
-<thead><tr><th>COMPLAINT ID</th><th>CATEGORY</th><th>PRIORITY</th><th>STATUS</th><th>DATE</th><th>ACTION</th></tr></thead>
-<tbody id="complaints"></tbody>
-</table>
+<div class="stat">
+<small>ASSIGNED</small>
+<strong id="assigned">0</strong>
 </div>
-<div class="empty" id="empty" style="display:none">No complaints found.</div>
+
+<div class="stat">
+<small>IN PROGRESS</small>
+<strong id="progress">0</strong>
+</div>
+
+<div class="stat">
+<small>RESOLVED</small>
+<strong id="resolved">0</strong>
+</div>
+
+</div>
+
+
+<!-- COMPLAINTS -->
+
+<section class="card">
+
+<div class="title">
+📋 Complaint Queue
+</div>
+
+<div class="table">
+
+<table>
+
+<thead>
+
+<tr>
+<th>COMPLAINT ID</th>
+<th>CATEGORY</th>
+<th>PRIORITY</th>
+<th>LEVEL</th>
+<th>STATUS</th>
+<th>DATE</th>
+<th>ACTION</th>
+</tr>
+
+</thead>
+
+<tbody id="complaints"></tbody>
+
+</table>
+
+</div>
+
+<div class="empty" id="empty" style="display:none">
+No complaints found.
+</div>
+
 </section>
 
 </main>
 
+
+<!-- DETAILS MODAL -->
+
 <div class="modal" id="modal">
+
 <div class="modalbox">
-<button class="view" onclick="closeModal()">✕ Close</button>
+
+<button class="view" onclick="closeModal()">
+✕ Close
+</button>
+
 <h2>Complaint Details</h2>
-<div class="detail"><small>COMPLAINT ID</small><p id="dId"></p></div>
-<div class="detail"><small>COMPLAINT</small><p id="dComplaint"></p></div>
-<div class="detail"><small>CATEGORY</small><p id="dCategory"></p></div>
-<div class="detail"><small>PRIORITY</small><p id="dPriority"></p></div>
-<div class="detail"><small>DEPARTMENT</small><p id="dDepartment"></p></div>
-<div class="detail"><small>SUMMARY</small><p id="dSummary"></p></div>
-<div class="detail"><small>ACTION</small><p id="dAction"></p></div>
-<div class="detail"><small>IMPACT</small><p id="dImpact"></p></div>
-<div class="detail"><small>SUBMITTED</small><p id="dDate"></p></div>
+
+<div class="detail">
+<small>COMPLAINT ID</small>
+<p id="dId"></p>
+</div>
+
+<div class="detail">
+<small>COMPLAINT</small>
+<p id="dComplaint"></p>
+</div>
+
+<div class="detail">
+<small>CATEGORY</small>
+<p id="dCategory"></p>
+</div>
+
+<div class="detail">
+<small>PRIORITY</small>
+<p id="dPriority"></p>
+</div>
+
+<div class="detail">
+<small>DEPARTMENT</small>
+<p id="dDepartment"></p>
+</div>
+
+<div class="detail">
+<small>CURRENT GOVERNMENT LEVEL</small>
+<p id="dLevel"></p>
+</div>
+
+<div class="detail">
+<small>STATUS</small>
+<p id="dStatus"></p>
+</div>
+
+<div class="detail">
+<small>SUMMARY</small>
+<p id="dSummary"></p>
+</div>
+
+<div class="detail">
+<small>ACTION</small>
+<p id="dAction"></p>
+</div>
+
+<div class="detail">
+<small>IMPACT</small>
+<p id="dImpact"></p>
+</div>
+
+<div class="detail">
+<small>SUBMITTED</small>
+<p id="dDate"></p>
+</div>
+
 </div>
 </div>
 
+
 <script>
+
 let complaints=[];
 let currentUser=null;
 
+
 async function checkLogin(){
- const r=await fetch("/api/me");
- if(!r.ok){location.href="/login";return;}
- currentUser=await r.json();
- document.getElementById("userInfo").textContent=
-   (currentUser.role_name||currentUser.role)+" • "+(currentUser.department||"");
- if(currentUser.role==="ADMIN"){
-   document.getElementById("officerSection").style.display="block";
-   document.getElementById("officerListSection").style.display="block";
-   loadOfficers();
- }
- loadComplaints();
+
+const r=await fetch("/api/me");
+
+if(!r.ok){
+location.href="/login";
+return;
 }
+
+currentUser=await r.json();
+
+document.getElementById("userInfo").textContent=
+(currentUser.role_name||currentUser.role)
++" • "+
+(currentUser.department||"");
+
+
+if(currentUser.role==="ADMIN"){
+
+document.getElementById("officerSection").style.display="block";
+
+document.getElementById("officerListSection").style.display="block";
+
+loadOfficers();
+
+}
+
+loadComplaints();
+
+}
+
 
 async function createOfficer(){
- const error=document.getElementById("error");
- const success=document.getElementById("success");
- error.style.display="none";success.style.display="none";
 
- const data={
-   name:document.getElementById("name").value.trim(),
-   username:document.getElementById("username").value.trim(),
-   password:document.getElementById("password").value,
-   role:document.getElementById("role").value,
-   department_code:document.getElementById("department").value
- };
+const error=document.getElementById("error");
 
- if(!data.name||!data.username||!data.password||!data.role||!data.department_code){
-   error.textContent="Please fill all fields.";
-   error.style.display="block";return;
- }
- if(data.password.length<8){
-   error.textContent="Password must contain at least 8 characters.";
-   error.style.display="block";return;
- }
+const success=document.getElementById("success");
 
- const r=await fetch("/api/admin/officers",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify(data)
- });
- const result=await r.json();
+error.style.display="none";
 
- if(!r.ok){
-   error.textContent=result.error||"Unable to create officer.";
-   error.style.display="block";return;
- }
+success.style.display="none";
 
- success.textContent="✅ "+result.role_name+" created successfully.";
- success.style.display="block";
 
- ["name","username","password","role","department"]
- .forEach(id=>document.getElementById(id).value="");
+const data={
 
- loadOfficers();
+name:document.getElementById("name").value.trim(),
+
+username:document.getElementById("username").value.trim(),
+
+password:document.getElementById("password").value,
+
+role:document.getElementById("role").value,
+
+department_code:document.getElementById("department").value
+
+};
+
+
+if(
+!data.name||
+!data.username||
+!data.password||
+!data.role||
+!data.department_code
+){
+
+error.textContent="Please fill all fields.";
+
+error.style.display="block";
+
+return;
+
 }
+
+
+if(data.password.length<8){
+
+error.textContent=
+"Password must contain at least 8 characters.";
+
+error.style.display="block";
+
+return;
+
+}
+
+
+const r=await fetch(
+"/api/admin/officers",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+}
+);
+
+
+const result=await r.json();
+
+
+if(!r.ok){
+
+error.textContent=
+result.error||
+"Unable to create officer.";
+
+error.style.display="block";
+
+return;
+
+}
+
+
+success.textContent=
+"✅ "+
+result.role_name+
+" created successfully.";
+
+success.style.display="block";
+
+
+["name","username","password","role","department"]
+.forEach(id=>{
+document.getElementById(id).value="";
+});
+
+
+loadOfficers();
+
+}
+
 
 async function loadOfficers(){
- const r=await fetch("/api/admin/officers");
- if(!r.ok)return;
- const data=await r.json();
- const tbody=document.getElementById("officers");
- const empty=document.getElementById("officerEmpty");
- tbody.innerHTML="";
 
- if(!data.length){empty.style.display="block";return;}
- empty.style.display="none";
+const r=await fetch("/api/admin/officers");
 
- data.forEach(o=>{
-   const tr=document.createElement("tr");
-   tr.innerHTML=`
-   <td>${esc(o.name)}</td>
-   <td>${esc(o.username)}</td>
-   <td><span class="role">${esc(o.role_name||o.role)}</span></td>
-   <td>${esc(o.department||o.department_code)}</td>
-   <td class="${o.active?'active':'inactive'}">${o.active?'● Active':'● Disabled'}</td>
-   <td><button class="view" onclick="toggleOfficer(${o.id},${!o.active})">${o.active?'Disable':'Enable'}</button></td>`;
-   tbody.appendChild(tr);
- });
+if(!r.ok)return;
+
+const data=await r.json();
+
+const tbody=document.getElementById("officers");
+
+const empty=document.getElementById("officerEmpty");
+
+tbody.innerHTML="";
+
+
+if(!data.length){
+
+empty.style.display="block";
+
+return;
+
 }
+
+
+empty.style.display="none";
+
+
+data.forEach(o=>{
+
+const tr=document.createElement("tr");
+
+tr.innerHTML=`
+
+<td>${esc(o.name)}</td>
+
+<td>${esc(o.username)}</td>
+
+<td>
+<span class="role">
+${esc(o.role_name||o.role)}
+</span>
+</td>
+
+<td>
+${esc(o.department||o.department_code)}
+</td>
+
+<td class="${o.active?'active':'inactive'}">
+${o.active?'● Active':'● Disabled'}
+</td>
+
+<td>
+
+<button
+class="view"
+onclick="toggleOfficer(${o.id},${!o.active})">
+
+${o.active?'Disable':'Enable'}
+
+</button>
+
+</td>
+
+`;
+
+tbody.appendChild(tr);
+
+});
+
+}
+
 
 async function toggleOfficer(id,active){
- if(!confirm(active?"Enable this officer?":"Disable this officer?"))return;
- await fetch("/api/admin/officers/"+id+"/active",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({active})
- });
- loadOfficers();
+
+if(
+!confirm(
+active
+?"Enable this officer?"
+:"Disable this officer?"
+)
+)return;
+
+
+await fetch(
+"/api/admin/officers/"+id+"/active",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({active})
 }
+);
+
+loadOfficers();
+
+}
+
 
 async function loadComplaints(){
- const r=await fetch("/api/department");
- if(!r.ok){location.href="/login";return;}
- complaints=await r.json();
- render();
+
+const r=await fetch("/api/department");
+
+if(!r.ok){
+
+location.href="/login";
+
+return;
+
 }
+
+complaints=await r.json();
+
+render();
+
+}
+
 
 function render(){
- const search=document.getElementById("search").value.toLowerCase();
- const filter=document.getElementById("filter").value;
 
- const list=complaints.filter(c=>{
-   const s=!search||
-     (c.complaint_id||"").toLowerCase().includes(search)||
-     (c.complaint||"").toLowerCase().includes(search)||
-     (c.category||"").toLowerCase().includes(search);
-   return s&&(!filter||c.status===filter);
- });
+const search=
+document.getElementById("search")
+.value
+.toLowerCase();
 
- document.getElementById("total").textContent=list.length;
- document.getElementById("assigned").textContent=list.filter(c=>c.status==="Assigned").length;
- document.getElementById("progress").textContent=list.filter(c=>c.status==="In Progress").length;
- document.getElementById("resolved").textContent=list.filter(c=>c.status==="Resolved").length;
+const filter=
+document.getElementById("filter")
+.value;
 
- const tbody=document.getElementById("complaints");
- tbody.innerHTML="";
- document.getElementById("empty").style.display=list.length?"none":"block";
 
- list.forEach(c=>{
-   const tr=document.createElement("tr");
-   const sc=c.status==="In Progress"?"progress":
-            c.status==="Resolved"?"resolved":
-            c.status==="Rejected"?"rejected":"assigned";
-   tr.innerHTML=`
-   <td><span class="id">${esc(c.complaint_id)}</span></td>
-   <td>${esc(c.category||"-")}</td>
-   <td class="${(c.priority||"").toLowerCase()}">${esc(c.priority||"-")}</td>
-   <td><span class="status ${sc}">${esc(c.status||"Assigned")}</span></td>
-   <td>${esc(c.created_at||"-")}</td>
-   <td>
-   <button class="view" onclick="viewComplaint('${attr(c.complaint_id)}')">View</button>
-   <select onchange="changeStatus('${attr(c.complaint_id)}',this.value)">
-   <option value="">Update</option>
-   <option>Assigned</option><option>In Progress</option>
-   <option>Resolved</option><option>Rejected</option>
-   </select>
-   </td>`;
-   tbody.appendChild(tr);
- });
+const list=complaints.filter(c=>{
+
+const s=
+!search||
+
+(c.complaint_id||"")
+.toLowerCase()
+.includes(search)||
+
+(c.complaint||"")
+.toLowerCase()
+.includes(search)||
+
+(c.category||"")
+.toLowerCase()
+.includes(search);
+
+
+return s&&(!filter||c.status===filter);
+
+});
+
+
+document.getElementById("total")
+.textContent=list.length;
+
+document.getElementById("assigned")
+.textContent=
+list.filter(c=>c.status==="Assigned").length;
+
+document.getElementById("progress")
+.textContent=
+list.filter(c=>c.status==="In Progress").length;
+
+document.getElementById("resolved")
+.textContent=
+list.filter(c=>c.status==="Resolved").length;
+
+
+const tbody=
+document.getElementById("complaints");
+
+tbody.innerHTML="";
+
+
+document.getElementById("empty")
+.style.display=
+list.length?"none":"block";
+
+
+list.forEach(c=>{
+
+const tr=document.createElement("tr");
+
+
+const sc=
+c.status==="In Progress"
+?"progress":
+c.status==="Resolved"
+?"resolved":
+c.status==="Rejected"
+?"rejected":
+"assigned";
+
+
+tr.innerHTML=`
+
+<td>
+<span class="id">
+${esc(c.complaint_id)}
+</span>
+</td>
+
+<td>
+${esc(c.category||"-")}
+</td>
+
+<td class="${(c.priority||"").toLowerCase()}">
+${esc(c.priority||"-")}
+</td>
+
+<td>
+<span class="level">
+${esc(
+c.assigned_role_name||
+c.assigned_role||
+"Village / Panchayat Officer"
+)}
+</span>
+</td>
+
+<td>
+<span class="status ${sc}">
+${esc(c.status||"Assigned")}
+</span>
+</td>
+
+<td>
+${esc(c.created_at||"-")}
+</td>
+
+<td>
+
+<button
+class="view"
+onclick="viewComplaint('${attr(c.complaint_id)}')">
+View
+</button>
+
+<select
+onchange="changeStatus('${attr(c.complaint_id)}',this.value)">
+
+<option value="">
+Update
+</option>
+
+<option>Assigned</option>
+
+<option>In Progress</option>
+
+<option>Resolved</option>
+
+<option>Rejected</option>
+
+</select>
+
+${
+canEscalate(c)
+?
+`<button
+class="escalate"
+onclick="escalateComplaint('${attr(c.complaint_id)}')">
+⬆ Escalate
+</button>`
+:""
 }
+
+</td>
+
+`;
+
+tbody.appendChild(tr);
+
+});
+
+}
+
+
+function canEscalate(c){
+
+if(currentUser?.role==="ADMIN"){
+
+return false;
+
+}
+
+return c.assigned_role===currentUser?.role;
+
+}
+
+
+async function escalateComplaint(id){
+
+if(
+!confirm(
+"Escalate this complaint to the next government level?"
+)
+)return;
+
+
+const r=await fetch(
+"/api/complaint/"
++encodeURIComponent(id)
++"/escalate",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+}
+}
+);
+
+
+const data=await r.json();
+
+
+if(!r.ok){
+
+alert(
+data.error||
+"Escalation failed."
+);
+
+return;
+
+}
+
+
+alert(
+"✅ Escalated to "+
+(data.new_role_name||"next level")
+);
+
+
+loadComplaints();
+
+}
+
 
 async function changeStatus(id,status){
- if(!status)return;
- const r=await fetch("/api/complaint/"+encodeURIComponent(id)+"/status",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({status})
- });
- const data=await r.json();
- if(!r.ok)alert(data.error||"Status update failed.");
- loadComplaints();
+
+if(!status)return;
+
+
+const r=await fetch(
+"/api/complaint/"
++encodeURIComponent(id)
++"/status",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+status
+})
 }
+);
+
+
+const data=await r.json();
+
+
+if(!r.ok){
+
+alert(
+data.error||
+"Status update failed."
+);
+
+}
+
+
+loadComplaints();
+
+}
+
 
 function viewComplaint(id){
- const c=complaints.find(x=>x.complaint_id===id);
- if(!c)return;
- ["Id","Complaint","Category","Priority","Department","Summary","Action","Impact","Date"]
- .forEach(x=>{
-   const key={
-     Id:"complaint_id",Complaint:"complaint",Category:"category",
-     Priority:"priority",Department:"department",Summary:"summary",
-     Action:"action",Impact:"impact",Date:"created_at"
-   }[x];
-   document.getElementById("d"+x).textContent=c[key]||"-";
- });
- document.getElementById("modal").style.display="flex";
+
+const c=
+complaints.find(
+x=>x.complaint_id===id
+);
+
+if(!c)return;
+
+
+document.getElementById("dId")
+.textContent=c.complaint_id||"-";
+
+document.getElementById("dComplaint")
+.textContent=c.complaint||"-";
+
+document.getElementById("dCategory")
+.textContent=c.category||"-";
+
+document.getElementById("dPriority")
+.textContent=c.priority||"-";
+
+document.getElementById("dDepartment")
+.textContent=c.department||"-";
+
+document.getElementById("dLevel")
+.textContent=
+c.assigned_role_name||
+c.assigned_role||
+"-";
+
+document.getElementById("dStatus")
+.textContent=
+c.status||"-";
+
+document.getElementById("dSummary")
+.textContent=c.summary||"-";
+
+document.getElementById("dAction")
+.textContent=c.action||"-";
+
+document.getElementById("dImpact")
+.textContent=c.impact||"-";
+
+document.getElementById("dDate")
+.textContent=c.created_at||"-";
+
+
+document.getElementById("modal")
+.style.display="flex";
+
 }
 
-function closeModal(){document.getElementById("modal").style.display="none"}
+
+function closeModal(){
+
+document.getElementById("modal")
+.style.display="none";
+
+}
+
 
 async function logout(){
- await fetch("/api/logout",{method:"POST"});
- location.href="/login";
+
+await fetch(
+"/api/logout",
+{
+method:"POST"
 }
+);
+
+location.href="/login";
+
+}
+
 
 function esc(v){
- return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
- .replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
-}
-function attr(v){return String(v??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'")}
 
-document.getElementById("search").addEventListener("input",render);
-document.getElementById("filter").addEventListener("change",render);
+return String(v??"")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+function attr(v){
+
+return String(v??"")
+.replace(/\\/g,"\\\\")
+.replace(/'/g,"\\'");
+
+}
+
+
+document
+.getElementById("search")
+.addEventListener(
+"input",
+render
+);
+
+
+document
+.getElementById("filter")
+.addEventListener(
+"change",
+render
+);
+
 
 checkLogin();
+
 </script>
+
 </body>
-</html>
+ </html>
