@@ -3,22 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TN Government - Citizen Complaint</title>
+
+<title>Tamil Nadu Government - Citizen Complaint</title>
 
 <style>
-*{box-sizing:border-box}
+*{
+    box-sizing:border-box;
+}
+
 body{
     margin:0;
     font-family:Arial,sans-serif;
     background:#f4f6f8;
     color:#222;
 }
+
 .header{
     background:#123b6d;
     color:white;
     padding:20px;
     text-align:center;
 }
+
 .container{
     max-width:800px;
     margin:30px auto;
@@ -27,12 +33,17 @@ body{
     border-radius:12px;
     box-shadow:0 3px 15px #0002;
 }
-h2{color:#123b6d}
+
+h2{
+    color:#123b6d;
+}
+
 label{
     display:block;
     margin-top:16px;
     font-weight:bold;
 }
+
 input,select,textarea{
     width:100%;
     padding:12px;
@@ -41,7 +52,12 @@ input,select,textarea{
     border-radius:6px;
     font-size:15px;
 }
-textarea{height:120px;resize:vertical}
+
+textarea{
+    height:120px;
+    resize:vertical;
+}
+
 button{
     margin-top:25px;
     width:100%;
@@ -53,7 +69,24 @@ button{
     font-size:16px;
     cursor:pointer;
 }
-button:hover{background:#0b2b50}
+
+button:hover{
+    background:#0b2b50;
+}
+
+#result{
+    display:none;
+    margin-top:20px;
+    padding:20px;
+    background:#e8f5e9;
+    border-left:5px solid #2e7d32;
+    border-radius:6px;
+}
+
+#result h3{
+    color:#2e7d32;
+    margin-top:0;
+}
 </style>
 </head>
 
@@ -74,7 +107,11 @@ button:hover{background:#0b2b50}
 <input type="text" id="name" required>
 
 <label>Mobile Number</label>
-<input type="tel" id="mobile" pattern="[0-9]{10}" required>
+<input type="tel" id="mobile"
+       pattern="[0-9]{10}"
+       maxlength="10"
+       placeholder="10 digit mobile number"
+       required>
 
 <label>District</label>
 <select id="district" required>
@@ -91,13 +128,19 @@ button:hover{background:#0b2b50}
 </select>
 
 <label>Taluk</label>
-<input type="text" id="taluk" required>
+<input type="text" id="taluk"
+       placeholder="Example: Chetpet"
+       required>
 
 <label>Block</label>
-<input type="text" id="block" required>
+<input type="text" id="block"
+       placeholder="Enter Block"
+       required>
 
 <label>Village / Panchayat</label>
-<input type="text" id="village" required>
+<input type="text" id="village"
+       placeholder="Enter Village / Panchayat"
+       required>
 
 <label>Complaint Department</label>
 <select id="department" required>
@@ -122,30 +165,131 @@ button:hover{background:#0b2b50}
 
 <label>Complaint Description</label>
 <textarea id="description"
-placeholder="Describe your complaint clearly..." required></textarea>
+placeholder="Describe your complaint clearly..."
+required></textarea>
 
 <label>Upload Photo (Optional)</label>
 <input type="file" id="photo" accept="image/*">
 
-<button type="submit">Submit Complaint</button>
+<button type="submit" id="submitBtn">
+    Submit Complaint
+</button>
 
 </form>
+
+<div id="result">
+    <h3>Complaint Submitted Successfully</h3>
+
+    <p>
+        <strong>Complaint ID:</strong>
+        <span id="complaintId"></span>
+    </p>
+
+    <p>
+        <strong>Department:</strong>
+        <span id="resultDepartment"></span>
+    </p>
+
+    <p>
+        <strong>Priority:</strong>
+        <span id="resultPriority"></span>
+    </p>
+
+    <p>
+        Please keep your Complaint ID for tracking.
+    </p>
+</div>
 
 </div>
 
 <script>
-document.getElementById("complaintForm").addEventListener("submit", function(e){
-    e.preventDefault();
 
-    const id = "TN-VCA-" + Date.now();
+document.getElementById("complaintForm").addEventListener(
+    "submit",
+    async function(e){
 
-    alert(
-        "Complaint submitted successfully!\n\n" +
-        "Complaint ID: " + id
-    );
+        e.preventDefault();
 
-    this.reset();
-});
+        const button = document.getElementById("submitBtn");
+
+        const complaint = document
+            .getElementById("description")
+            .value
+            .trim();
+
+        if(!complaint){
+            alert("Please enter your complaint.");
+            return;
+        }
+
+        button.disabled = true;
+        button.innerText = "Submitting...";
+
+        try{
+
+            const response = await fetch("/api/analyze",{
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+                    complaint:complaint
+                })
+
+            });
+
+            const data = await response.json();
+
+            if(!response.ok){
+
+                alert(
+                    data.error ||
+                    "Complaint submission failed."
+                );
+
+                return;
+            }
+
+            document.getElementById("complaintId").innerText =
+                data.complaint_id || "Generated";
+
+            document.getElementById("resultDepartment").innerText =
+                data.department || "Assigned";
+
+            document.getElementById("resultPriority").innerText =
+                data.priority || "Normal";
+
+            document.getElementById("result").style.display =
+                "block";
+
+            document.getElementById("complaintForm").reset();
+
+            window.scrollTo({
+                top:document.body.scrollHeight,
+                behavior:"smooth"
+            });
+
+        }
+        catch(error){
+
+            alert(
+                "Unable to connect to the server. Please try again."
+            );
+
+        }
+        finally{
+
+            button.disabled = false;
+            button.innerText = "Submit Complaint";
+
+        }
+
+    }
+);
+
 </script>
 
 </body>
