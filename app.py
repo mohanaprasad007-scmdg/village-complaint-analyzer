@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify, send_from_directory, session, redirect
 from openai import OpenAI
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3, os, json, uuid
+import sqlite3
+import os
+import json
+import uuid
 from datetime import datetime
 
 try:
@@ -10,12 +13,21 @@ try:
 except ImportError:
     psycopg2 = None
 
+
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "vca-change-this-secret-key")
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "vca-change-this-secret-key"
+)
 
 DB_NAME = "complaints.db"
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+
+client = (
+    OpenAI(api_key=OPENAI_API_KEY)
+    if OPENAI_API_KEY
+    else None
+)
 
 
 # =========================================================
@@ -52,40 +64,55 @@ HIERARCHY = [
 ]
 
 ROLE_NAMES = dict(HIERARCHY)
-ROLE_ORDER = {role: i for i, (role, name) in enumerate(HIERARCHY)}
 
-# Old accounts are treated as Department Officers
+ROLE_ORDER = {
+    role: i
+    for i, (role, name) in enumerate(HIERARCHY)
+}
+
 ROLE_ALIASES = {
     "OFFICER": "DEPARTMENT_OFFICER"
 }
 
 
 # =========================================================
-# DATABASE
+# DATABASE CONNECTION
 # =========================================================
 
 def using_postgres():
-    return bool(os.environ.get("DATABASE_URL")) and psycopg2 is not None
+    return (
+        bool(os.environ.get("DATABASE_URL"))
+        and psycopg2 is not None
+    )
 
 
 class DB:
+
     def __init__(self):
+
         self.pg = using_postgres()
 
         if self.pg:
+
             self.conn = psycopg2.connect(
                 os.environ["DATABASE_URL"],
                 cursor_factory=psycopg2.extras.RealDictCursor
             )
+
         else:
+
             self.conn = sqlite3.connect(DB_NAME)
+
             self.conn.row_factory = sqlite3.Row
 
     def execute(self, sql, params=()):
+
         if self.pg:
             sql = sql.replace("?", "%s")
+
         cur = self.conn.cursor()
         cur.execute(sql, params)
+
         return cur
 
     def commit(self):
@@ -100,14 +127,97 @@ def get_db():
 
 
 # =========================================================
-# DATABASE SETUP
+# DATABASE INITIALIZATION
+# =========================================================
+
+def init_db():
+
+    db = get_db()
+
+    if db.pg:
+
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS complaints (
+                id SERIAL PRIMARY KEY,
+                complaint_id TEXT UNIQUE NOT NULL,
+                complaint TEXT NOT NULL,
+                category TEXT,
+                priority TEXT,
+                department_code TEXT,
+                department TEXT,
+                summary TEXT,
+                action TEXT,
+                impact TEXT,
+                status TEXT DEFAULT 'Assigned',
+                created_at TEXT,
+                assigned_role TEXT,
+                assigned_user_id INTEGER,
+                current_level INTEGER,
+                updated_at TEXT
+            )
+        """)
+
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                department_code TEXT,
+                role TEXT,
+                active INTEGER DEFAULT 1,
+                created_at TEXT
+            )
+        """)
+
+    else:
+
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS complaints (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                complaint_id TEXT UNIQUE NOT NULL,
+                complaint TEXT NOT NULL,
+                category TEXT,
+                priority TEXT,
+                department_code TEXT,
+                department TEXT,
+                summary TEXT,
+                action TEXT,
+                impact TEXT,
+                status TEXT DEFAULT 'Assigned',
+                created_at TEXT,
+                assigned_role TEXT,
+                assigned_user_id INTEGER,
+                current_level INTEGER,
+                updated_at TEXT
+            )
+        """)
+
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                department_code TEXT,
+                role TEXT,
+                active INTEGER DEFAULT 1,
+                created_at TEXT
+            )
+        """)
+
+    db.commit()
+    db.close()
+
+
+# =========================================================
+# DATABASE UPGRADE
 # =========================================================
 
 def upgrade_db():
 
     db = get_db()
 
-    # Add new escalation columns
     complaint_columns = [
         ("assigned_role", "TEXT"),
         ("assigned_user_id", "INTEGER"),
@@ -128,10 +238,12 @@ def upgrade_db():
                     """
                 )
 
+                db.commit()
+
             except Exception as e:
 
                 print(
-                    "Column migration:",
+                    "Column migration error:",
                     name,
                     repr(e)
                 )
@@ -158,14 +270,14 @@ def upgrade_db():
                     """
                 )
 
+        db.commit()
 
-    # =====================================================
-    # OLD COMPLAINT MIGRATION
-    # =====================================================
+    # -----------------------------------------------------
+    # MIGRATE OLD COMPLAINTS
+    # -----------------------------------------------------
 
     try:
 
-        # Old complaints start at Village Officer
         db.execute("""
             UPDATE complaints
             SET assigned_role = 'VILLAGE_OFFICER'
@@ -173,14 +285,12 @@ def upgrade_db():
                OR assigned_role = ''
         """)
 
-        # First hierarchy level
         db.execute("""
             UPDATE complaints
             SET current_level = 1
             WHERE current_level IS NULL
         """)
 
-        # Preserve existing status
         db.execute("""
             UPDATE complaints
             SET status = 'Assigned'
@@ -188,7 +298,6 @@ def upgrade_db():
                OR status = ''
         """)
 
-        # Set update time
         db.execute("""
             UPDATE complaints
             SET updated_at = created_at
@@ -196,59 +305,21 @@ def upgrade_db():
                OR updated_at = ''
         """)
 
+        db.commit()
+
     except Exception as e:
 
         print(
-            "Complaint migration:",
+            "Complaint migration error:",
             repr(e)
         )
 
         db.conn.rollback()
 
-
-    db.commit()
-    db.close()
-    
-
-
-def upgrade_db():
-    db = get_db()
-
-    complaint_columns = [
-        ("assigned_role", "TEXT"),
-        ("assigned_user_id", "INTEGER"),
-        ("current_level", "INTEGER"),
-        ("updated_at", "TEXT")
-    ]
-
-    user_columns = []
-
-    if db.pg:
-        for name, typ in complaint_columns:
-            try:
-                db.execute(
-                    f"ALTER TABLE complaints ADD COLUMN IF NOT EXISTS {name} {typ}"
-                )
-            except Exception:
-                db.conn.rollback()
-    else:
-        existing = [
-            row["name"]
-            for row in db.execute(
-                "PRAGMA table_info(complaints)"
-            ).fetchall()
-        ]
-
-        for name, typ in complaint_columns:
-            if name not in existing:
-                db.execute(
-                    f"ALTER TABLE complaints ADD COLUMN {name} {typ}"
-                )
-
-    db.commit()
     db.close()
 
 
+# IMPORTANT
 init_db()
 upgrade_db()
 
@@ -258,9 +329,15 @@ upgrade_db()
 # =========================================================
 
 def admin_credentials():
+
     return (
-        os.environ.get("ADMIN_USERNAME", "vcaadmin"),
-        os.environ.get("ADMIN_PASSWORD")
+        os.environ.get(
+            "ADMIN_USERNAME",
+            "vcaadmin"
+        ),
+        os.environ.get(
+            "ADMIN_PASSWORD"
+        )
     )
 
 
@@ -269,8 +346,13 @@ def is_admin():
 
 
 def current_role():
+
     role = session.get("role", "")
-    return ROLE_ALIASES.get(role, role)
+
+    return ROLE_ALIASES.get(
+        role,
+        role
+    )
 
 
 def current_department():
@@ -278,11 +360,18 @@ def current_department():
 
 
 def now():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    return datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
 
 def find_next_role(role):
-    role = ROLE_ALIASES.get(role, role)
+
+    role = ROLE_ALIASES.get(
+        role,
+        role
+    )
 
     if role not in ROLE_ORDER:
         return None
@@ -295,7 +384,12 @@ def find_next_role(role):
     return HIERARCHY[index][0]
 
 
-def assign_officer(db, department_code, role):
+def assign_officer(
+    db,
+    department_code,
+    role
+):
+
     row = db.execute("""
         SELECT id
         FROM users
@@ -304,12 +398,16 @@ def assign_officer(db, department_code, role):
           AND role = ?
         ORDER BY id ASC
         LIMIT 1
-    """, (department_code, role)).fetchone()
+    """, (
+        department_code,
+        role
+    )).fetchone()
 
     return row["id"] if row else None
 
 
 def can_access_complaint(row):
+
     if is_admin():
         return True
 
@@ -317,8 +415,10 @@ def can_access_complaint(row):
         return False
 
     assigned_role = ROLE_ALIASES.get(
-        row["assigned_role"] or "VILLAGE_OFFICER",
-        row["assigned_role"] or "VILLAGE_OFFICER"
+        row["assigned_role"]
+        or "VILLAGE_OFFICER",
+        row["assigned_role"]
+        or "VILLAGE_OFFICER"
     )
 
     if assigned_role != current_role():
@@ -327,90 +427,172 @@ def can_access_complaint(row):
     assigned_user = row["assigned_user_id"]
 
     if assigned_user is not None:
-        return str(assigned_user) == str(session.get("user_id"))
+
+        return (
+            str(assigned_user)
+            == str(session.get("user_id"))
+        )
 
     return True
 
 
 # =========================================================
-# LOCAL AI
+# LOCAL AI ANALYSIS
 # =========================================================
 
 def local_analyze(complaint):
+
     text = complaint.lower()
 
     rules = {
+
         "WATER": [
-            "water", "drinking water", "tap water",
-            "water supply", "no water"
+            "water",
+            "drinking water",
+            "tap water",
+            "water supply",
+            "no water"
         ],
+
         "ROAD": [
-            "road", "pothole", "potholes",
-            "road damage", "street damage"
+            "road",
+            "pothole",
+            "potholes",
+            "road damage",
+            "street damage"
         ],
+
         "ELECTRICITY": [
-            "electricity", "electric", "power cut",
-            "power", "current"
+            "electricity",
+            "electric",
+            "power cut",
+            "power",
+            "current"
         ],
+
         "STREET_LIGHT": [
-            "street light", "streetlight",
-            "street lights", "lamp"
+            "street light",
+            "streetlight",
+            "street lights",
+            "lamp"
         ],
+
         "SANITATION": [
-            "garbage", "waste", "rubbish",
-            "trash", "sanitation"
+            "garbage",
+            "waste",
+            "rubbish",
+            "trash",
+            "sanitation"
         ],
+
         "DRAINAGE": [
-            "drain", "drainage", "sewage", "sewer"
+            "drain",
+            "drainage",
+            "sewage",
+            "sewer"
         ],
+
         "HEALTH": [
-            "hospital", "health", "doctor",
-            "medical", "clinic", "ambulance"
+            "hospital",
+            "health",
+            "doctor",
+            "medical",
+            "clinic",
+            "ambulance"
         ],
+
         "EDUCATION": [
-            "school", "teacher", "education",
-            "classroom", "college"
+            "school",
+            "teacher",
+            "education",
+            "classroom",
+            "college"
         ],
+
         "AGRICULTURE": [
-            "farmer", "farmers", "farming",
-            "crop", "agriculture", "irrigation"
+            "farmer",
+            "farmers",
+            "farming",
+            "crop",
+            "agriculture",
+            "irrigation"
         ],
+
         "SAFETY": [
-            "crime", "robbery", "violence",
-            "danger", "unsafe", "police"
+            "crime",
+            "robbery",
+            "violence",
+            "danger",
+            "unsafe",
+            "police"
         ]
     }
 
     code = "OTHER"
 
     for department, words in rules.items():
-        if any(word in text for word in words):
+
+        if any(
+            word in text
+            for word in words
+        ):
+
             code = department
             break
 
-    if any(x in text for x in [
-        "emergency", "life threatening",
-        "accident", "fire", "death",
-        "dying", "serious injury"
-    ]):
+    if any(
+        x in text
+        for x in [
+            "emergency",
+            "life threatening",
+            "accident",
+            "fire",
+            "death",
+            "dying",
+            "serious injury"
+        ]
+    ):
+
         priority = "Emergency"
-    elif any(x in text for x in [
-        "urgent", "severe", "week",
-        "weeks", "months", "hospital",
-        "unsafe", "children", "elderly"
-    ]):
+
+    elif any(
+        x in text
+        for x in [
+            "urgent",
+            "severe",
+            "week",
+            "weeks",
+            "months",
+            "hospital",
+            "unsafe",
+            "children",
+            "elderly"
+        ]
+    ):
+
         priority = "High"
-    elif any(x in text for x in [
-        "not working", "broken",
-        "blocked", "problem",
-        "issue", "no water",
-        "no electricity"
-    ]):
+
+    elif any(
+        x in text
+        for x in [
+            "not working",
+            "broken",
+            "blocked",
+            "problem",
+            "issue",
+            "no water",
+            "no electricity"
+        ]
+    ):
+
         priority = "Medium"
+
     else:
+
         priority = "Low"
 
     categories = {
+
         "ROAD": "Roads",
         "WATER": "Water",
         "ELECTRICITY": "Electricity",
@@ -425,37 +607,79 @@ def local_analyze(complaint):
     }
 
     actions = {
-        "ROAD": "Inspect the affected road and arrange necessary repair work.",
-        "WATER": "Inspect the water supply system and restore drinking water service.",
-        "ELECTRICITY": "Inspect the electrical supply and repair the reported fault.",
-        "STREET_LIGHT": "Inspect and repair or replace faulty street lights.",
-        "SANITATION": "Arrange sanitation services and remove accumulated waste.",
-        "DRAINAGE": "Inspect and clear the drainage or sewage blockage.",
-        "HEALTH": "Refer the issue to the appropriate public health authority.",
-        "EDUCATION": "Refer the issue to the appropriate education authority.",
-        "AGRICULTURE": "Refer the issue to the agriculture department.",
-        "SAFETY": "Refer the issue to the appropriate public safety authority.",
-        "OTHER": "Forward the complaint to the local administration."
+
+        "ROAD":
+            "Inspect the affected road and arrange necessary repair work.",
+
+        "WATER":
+            "Inspect the water supply system and restore drinking water service.",
+
+        "ELECTRICITY":
+            "Inspect the electrical supply and repair the reported fault.",
+
+        "STREET_LIGHT":
+            "Inspect and repair or replace faulty street lights.",
+
+        "SANITATION":
+            "Arrange sanitation services and remove accumulated waste.",
+
+        "DRAINAGE":
+            "Inspect and clear the drainage or sewage blockage.",
+
+        "HEALTH":
+            "Refer the issue to the appropriate public health authority.",
+
+        "EDUCATION":
+            "Refer the issue to the appropriate education authority.",
+
+        "AGRICULTURE":
+            "Refer the issue to the agriculture department.",
+
+        "SAFETY":
+            "Refer the issue to the appropriate public safety authority.",
+
+        "OTHER":
+            "Forward the complaint to the local administration."
     }
 
     return {
-        "category": categories[code],
-        "priority": priority,
-        "department_code": code,
-        "department": DEPARTMENTS[code]["name"],
-        "summary": complaint,
-        "action": actions[code],
-        "impact": "The reported issue may affect local residents."
+
+        "category":
+            categories[code],
+
+        "priority":
+            priority,
+
+        "department_code":
+            code,
+
+        "department":
+            DEPARTMENTS[code]["name"],
+
+        "summary":
+            complaint,
+
+        "action":
+            actions[code],
+
+        "impact":
+            "The reported issue may affect local residents."
     }
 
 
+# =========================================================
+# OPENAI ANALYSIS
+# =========================================================
+
 def ai_analyze(complaint):
+
     prompt = f"""
 Analyze this citizen complaint:
 
 {complaint}
 
 Return ONLY JSON with:
+
 category,
 priority,
 department_code,
@@ -464,11 +688,25 @@ action,
 impact.
 
 department_code must be one of:
-ROAD, WATER, ELECTRICITY, STREET_LIGHT, SANITATION,
-DRAINAGE, HEALTH, EDUCATION, AGRICULTURE, SAFETY, OTHER.
+
+ROAD,
+WATER,
+ELECTRICITY,
+STREET_LIGHT,
+SANITATION,
+DRAINAGE,
+HEALTH,
+EDUCATION,
+AGRICULTURE,
+SAFETY,
+OTHER.
 
 priority must be:
-Low, Medium, High, Emergency.
+
+Low,
+Medium,
+High,
+Emergency.
 """
 
     response = client.responses.create(
@@ -477,7 +715,13 @@ Low, Medium, High, Emergency.
     )
 
     text = response.output_text.strip()
-    text = text.replace("```json", "").replace("```", "").strip()
+
+    text = (
+        text
+        .replace("```json", "")
+        .replace("```", "")
+        .strip()
+    )
 
     return json.loads(text)
 
@@ -488,73 +732,135 @@ Low, Medium, High, Emergency.
 
 @app.route("/")
 def home():
-    return send_from_directory(".", "index.html")
+
+    return send_from_directory(
+        ".",
+        "index.html"
+    )
 
 
 @app.route("/citizen")
 def citizen():
-    return send_from_directory(".", "citizen.html")
+
+    return send_from_directory(
+        ".",
+        "citizen.html"
+    )
 
 
 @app.route("/login")
 def login():
+
     if "role" in session:
         return redirect("/admin")
-    return send_from_directory(".", "login.html")
+
+    return send_from_directory(
+        ".",
+        "login.html"
+    )
 
 
 @app.route("/admin")
 def admin():
+
     if "role" not in session:
         return redirect("/login")
-    return send_from_directory(".", "admin.html")
+
+    return send_from_directory(
+        ".",
+        "admin.html"
+    )
 
 
 # =========================================================
 # LOGIN
 # =========================================================
 
-@app.route("/api/login", methods=["POST"])
+@app.route(
+    "/api/login",
+    methods=["POST"]
+)
 def api_login():
-    data = request.get_json(silent=True) or {}
 
-    username = str(data.get("username", "")).strip().lower()
-    password = str(data.get("password", ""))
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    username = str(
+        data.get(
+            "username",
+            ""
+        )
+    ).strip().lower()
+
+    password = str(
+        data.get(
+            "password",
+            ""
+        )
+    )
+
     requested_role = str(
-        data.get("requested_role", "OFFICER")
+        data.get(
+            "requested_role",
+            "OFFICER"
+        )
     ).strip().upper()
 
     if not username or not password:
+
         return jsonify({
-            "error": "Username and password are required."
+            "error":
+                "Username and password are required."
         }), 400
 
     admin_user, admin_pass = admin_credentials()
 
     if requested_role == "ADMIN":
+
         if (
             admin_pass
             and username == admin_user.lower()
             and password == admin_pass
         ):
+
             session.clear()
+
             session.update({
+
                 "user_id": "admin",
-                "username": admin_user,
-                "name": "System Administrator",
-                "role": "ADMIN",
-                "department_code": "OTHER",
-                "department_name": "All Departments"
+
+                "username":
+                    admin_user,
+
+                "name":
+                    "System Administrator",
+
+                "role":
+                    "ADMIN",
+
+                "department_code":
+                    "OTHER",
+
+                "department_name":
+                    "All Departments"
             })
 
             return jsonify({
-                "success": True,
-                "role": "ADMIN",
-                "redirect": "/admin"
+
+                "success":
+                    True,
+
+                "role":
+                    "ADMIN",
+
+                "redirect":
+                    "/admin"
             })
 
         return jsonify({
-            "error": "Invalid Main Admin credentials."
+            "error":
+                "Invalid Main Admin credentials."
         }), 401
 
     db = get_db()
@@ -565,28 +871,36 @@ def api_login():
         WHERE username = ?
           AND active = 1
         LIMIT 1
-    """, (username,)).fetchone()
+    """, (
+        username,
+    )).fetchone()
 
     db.close()
 
     if not user:
+
         return jsonify({
-            "error": "Officer account not found."
+            "error":
+                "Officer account not found."
         }), 401
 
     if not check_password_hash(
         user["password_hash"],
         password
     ):
+
         return jsonify({
-            "error": "Invalid officer password."
+            "error":
+                "Invalid officer password."
         }), 401
 
     code = user["department_code"]
 
     if code not in DEPARTMENTS:
+
         return jsonify({
-            "error": "Invalid officer department."
+            "error":
+                "Invalid officer department."
         }), 403
 
     role = ROLE_ALIASES.get(
@@ -595,21 +909,47 @@ def api_login():
     )
 
     session.clear()
+
     session.update({
-        "user_id": user["id"],
-        "username": user["username"],
-        "name": user["name"],
-        "role": role,
-        "department_code": code,
-        "department_name": DEPARTMENTS[code]["name"]
+
+        "user_id":
+            user["id"],
+
+        "username":
+            user["username"],
+
+        "name":
+            user["name"],
+
+        "role":
+            role,
+
+        "department_code":
+            code,
+
+        "department_name":
+            DEPARTMENTS[code]["name"]
     })
 
     return jsonify({
-        "success": True,
-        "role": role,
-        "role_name": ROLE_NAMES.get(role, role),
-        "department": DEPARTMENTS[code]["name"],
-        "redirect": "/admin"
+
+        "success":
+            True,
+
+        "role":
+            role,
+
+        "role_name":
+            ROLE_NAMES.get(
+                role,
+                role
+            ),
+
+        "department":
+            DEPARTMENTS[code]["name"],
+
+        "redirect":
+            "/admin"
     })
 
 
@@ -617,12 +957,20 @@ def api_login():
 # LOGOUT
 # =========================================================
 
-@app.route("/api/logout", methods=["POST"])
+@app.route(
+    "/api/logout",
+    methods=["POST"]
+)
 def logout():
+
     session.clear()
+
     return jsonify({
-        "success": True,
-        "redirect": "/login"
+        "success":
+            True,
+
+        "redirect":
+            "/login"
     })
 
 
@@ -632,26 +980,51 @@ def logout():
 
 @app.route("/api/me")
 def me():
+
     if "role" not in session:
+
         return jsonify({
-            "authenticated": False
+            "authenticated":
+                False
         }), 401
 
     role = current_role()
 
     return jsonify({
-        "authenticated": True,
-        "user_id": session.get("user_id"),
-        "username": session.get("username"),
-        "name": session.get("name"),
-        "role": role,
+
+        "authenticated":
+            True,
+
+        "user_id":
+            session.get("user_id"),
+
+        "username":
+            session.get("username"),
+
+        "name":
+            session.get("name"),
+
+        "role":
+            role,
+
         "role_name": (
             "System Administrator"
-            if role == "ADMIN"
-            else ROLE_NAMES.get(role, role)
+                        if role == "ADMIN"
+            else ROLE_NAMES.get(
+                role,
+                role
+            )
         ),
-        "department_code": session.get("department_code"),
-        "department": session.get("department_name")
+
+        "department_code":
+            session.get(
+                "department_code"
+            ),
+
+        "department":
+            session.get(
+                "department_name"
+            )
     })
 
 
@@ -661,13 +1034,15 @@ def me():
 
 @app.route("/api/roles")
 def roles():
+
     return jsonify([
         {
             "role": role,
             "name": name,
             "level": i + 1
         }
-        for i, (role, name) in enumerate(HIERARCHY)
+        for i, (role, name)
+        in enumerate(HIERARCHY)
     ])
 
 
@@ -677,6 +1052,7 @@ def roles():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze():
+
     data = request.get_json(silent=True) or {}
 
     complaint = str(
@@ -720,8 +1096,8 @@ def analyze():
 
     db = get_db()
 
-    # FIRST LEVEL = VILLAGE OFFICER
     assigned_role = "VILLAGE_OFFICER"
+
     assigned_user_id = assign_officer(
         db,
         code,
@@ -747,7 +1123,8 @@ def analyze():
             current_level,
             updated_at
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         complaint_id,
         complaint,
@@ -792,6 +1169,7 @@ def analyze():
 
 @app.route("/api/complaint/<complaint_id>")
 def track(complaint_id):
+
     db = get_db()
 
     row = db.execute("""
@@ -821,7 +1199,7 @@ def track(complaint_id):
 
 
 # =========================================================
-# OFFICER COMPLAINT DASHBOARD
+# OFFICER DASHBOARD
 # =========================================================
 
 @app.route("/api/department")
@@ -858,7 +1236,9 @@ def department():
         """, (
             current_department(),
             role,
-            "OFFICER" if role == "DEPARTMENT_OFFICER" else role
+            "OFFICER"
+            if role == "DEPARTMENT_OFFICER"
+            else role
         )).fetchall()
 
     db.close()
@@ -880,7 +1260,7 @@ def department():
 
 
 # =========================================================
-# ALL COMPLAINTS - ADMIN
+# ALL COMPLAINTS
 # =========================================================
 
 @app.route("/api/complaints")
@@ -902,7 +1282,8 @@ def complaints():
     db.close()
 
     return jsonify([
-        dict(x) for x in rows
+        dict(x)
+        for x in rows
     ])
 
 
@@ -963,7 +1344,7 @@ def update_status(complaint_id):
 
         return jsonify({
             "error":
-            "This complaint is assigned to another government level."
+                "This complaint is assigned to another government level."
         }), 403
 
     db.execute("""
@@ -1024,12 +1405,14 @@ def escalate(complaint_id):
 
         return jsonify({
             "error":
-            "You cannot escalate this complaint."
+                "You cannot escalate this complaint."
         }), 403
 
     current = ROLE_ALIASES.get(
-        row["assigned_role"] or "VILLAGE_OFFICER",
-        row["assigned_role"] or "VILLAGE_OFFICER"
+        row["assigned_role"]
+        or "VILLAGE_OFFICER",
+        row["assigned_role"]
+        or "VILLAGE_OFFICER"
     )
 
     next_role = find_next_role(current)
@@ -1040,7 +1423,7 @@ def escalate(complaint_id):
 
         return jsonify({
             "error":
-            "This complaint has reached the State Administrator level."
+                "This complaint has reached the State Administrator level."
         }), 400
 
     next_level = ROLE_ORDER[next_role] + 1
@@ -1075,13 +1458,13 @@ def escalate(complaint_id):
         "success": True,
         "complaint_id": complaint_id,
         "previous_role": current,
-        "previous_role_name": ROLE_NAMES.get(
-            current,
-            current
-        ),
+        "previous_role_name":
+            ROLE_NAMES.get(current, current),
         "new_role": next_role,
-        "new_role_name": ROLE_NAMES[next_role],
-        "assigned_user_id": next_user_id,
+        "new_role_name":
+            ROLE_NAMES[next_role],
+        "assigned_user_id":
+            next_user_id,
         "status": "Assigned",
         "message":
             (
@@ -1109,7 +1492,7 @@ def create_officer():
     if not is_admin():
         return jsonify({
             "error":
-            "Administrator access required."
+                "Administrator access required."
         }), 403
 
     data = request.get_json(
@@ -1148,36 +1531,37 @@ def create_officer():
 
         return jsonify({
             "error":
-            "Name and username are required."
+                "Name and username are required."
         }), 400
 
     if len(password) < 8:
 
         return jsonify({
             "error":
-            "Password must contain at least 8 characters."
+                "Password must contain at least 8 characters."
         }), 400
 
     if code not in DEPARTMENTS:
 
         return jsonify({
             "error":
-            "Invalid department."
+                "Invalid department."
         }), 400
 
     if role not in allowed_roles:
 
         return jsonify({
             "error":
-            "Invalid officer level."
+                "Invalid officer level."
         }), 400
 
     db = get_db()
 
-    existing = db.execute(
-        "SELECT id FROM users WHERE username = ?",
-        (username,)
-    ).fetchone()
+    existing = db.execute("""
+        SELECT id
+        FROM users
+        WHERE username = ?
+    """, (username,)).fetchone()
 
     if existing:
 
@@ -1185,7 +1569,7 @@ def create_officer():
 
         return jsonify({
             "error":
-            "Username already exists."
+                "Username already exists."
         }), 409
 
     db.execute("""
@@ -1215,12 +1599,15 @@ def create_officer():
 
     return jsonify({
         "success": True,
-        "message": "Officer account created.",
+        "message":
+            "Officer account created.",
         "name": name,
         "username": username,
         "role": role,
-        "role_name": ROLE_NAMES[role],
-        "department_code": code,
+        "role_name":
+            ROLE_NAMES[role],
+        "department_code":
+            code,
         "department":
             DEPARTMENTS[code]["name"]
     })
@@ -1230,13 +1617,15 @@ def create_officer():
 # LIST OFFICERS
 # =========================================================
 
-@app.route("/api/admin/officers")
+@app.route(
+    "/api/admin/officers"
+)
 def list_officers():
 
     if not is_admin():
         return jsonify({
             "error":
-            "Administrator access required."
+                "Administrator access required."
         }), 403
 
     db = get_db()
@@ -1276,7 +1665,10 @@ def list_officers():
 
         item["department"] = (
             DEPARTMENTS
-            .get(item["department_code"], {})
+            .get(
+                item["department_code"],
+                {}
+            )
             .get(
                 "name",
                 item["department_code"]
@@ -1301,7 +1693,7 @@ def change_officer(user_id):
     if not is_admin():
         return jsonify({
             "error":
-            "Administrator access required."
+                "Administrator access required."
         }), 403
 
     data = request.get_json(
@@ -1314,7 +1706,7 @@ def change_officer(user_id):
 
         return jsonify({
             "error":
-            "Active must be true or false."
+                "Active must be true or false."
         }), 400
 
     db = get_db()
@@ -1338,7 +1730,7 @@ def change_officer(user_id):
 
         return jsonify({
             "error":
-            "Officer not found."
+                "Officer not found."
         }), 404
 
     return jsonify({
@@ -1373,18 +1765,20 @@ def health():
     return jsonify({
         "status": "ok",
         "service":
-        "Village Complaint Analyzer",
+            "Village Complaint Analyzer",
         "database":
-        "PostgreSQL"
-        if using_postgres()
-        else "SQLite",
+            (
+                "PostgreSQL"
+                if using_postgres()
+                else "SQLite"
+            ),
         "openai_configured":
-        bool(OPENAI_API_KEY),
+            bool(OPENAI_API_KEY),
         "local_fallback": True,
         "active_officers":
-        officers["c"],
+            officers["c"],
         "total_complaints":
-        complaints["c"]
+            complaints["c"]
     })
 
 
@@ -1403,3 +1797,4 @@ if __name__ == "__main__":
             )
         )
     )
+            
