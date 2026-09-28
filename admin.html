@@ -59,7 +59,13 @@ th{font-size:9px;color:#718094}
 .detail{margin:13px 0}
 .detail small{display:block;color:#68778a;font-size:9px}
 .detail p{line-height:1.5;color:#c4cdd8}
-
+.location-note{
+grid-column:1/-1;
+font-size:11px;
+color:#718094;
+padding:5px 0;
+}
+.location-hidden{display:none}
 @media(max-width:700px){
 .grid{grid-template-columns:1fr}
 .stats{grid-template-columns:repeat(2,1fr)}
@@ -72,16 +78,15 @@ th{font-size:9px;color:#718094}
 
 <nav>
 <div class="container nav">
-
 <div class="logo">🏛️ VCA Government Dashboard</div>
 
 <div class="user">
 <span class="badge" id="userInfo">Loading...</span>
 <button class="logout" onclick="logout()">Logout</button>
 </div>
-
 </div>
 </nav>
+
 
 <main class="container">
 
@@ -112,7 +117,7 @@ type="password"
 placeholder="Password (minimum 8 characters)"
 >
 
-<select id="role">
+<select id="role" onchange="updateLocationFields()">
 
 <option value="">Select Officer Level</option>
 
@@ -197,17 +202,33 @@ Panchayat / Local Administration
 
 </select>
 
-<!-- LOCATION -->
 
+<div id="locationNote" class="location-note">
+Select officer level to choose the required location.
+</div>
+
+
+<div id="districtBox">
 <input id="district" placeholder="District">
+</div>
 
+
+<div id="talukBox">
 <input id="taluk" placeholder="Taluk">
+</div>
 
+
+<div id="blockBox">
 <input id="block" placeholder="Block">
+</div>
 
+
+<div id="villageBox">
 <input id="village" placeholder="Village / Panchayat">
+</div>
 
 </div>
+
 
 <div class="actions">
 
@@ -431,6 +452,133 @@ let complaints=[];
 let currentUser=null;
 
 
+/* =====================================================
+   LOCATION FIELD CONTROL
+   ===================================================== */
+
+function updateLocationFields(){
+
+const role=
+document.getElementById("role").value;
+
+
+const districtBox=
+document.getElementById("districtBox");
+
+const talukBox=
+document.getElementById("talukBox");
+
+const blockBox=
+document.getElementById("blockBox");
+
+const villageBox=
+document.getElementById("villageBox");
+
+const note=
+document.getElementById("locationNote");
+
+
+districtBox.classList.add("location-hidden");
+talukBox.classList.add("location-hidden");
+blockBox.classList.add("location-hidden");
+villageBox.classList.add("location-hidden");
+
+
+if(!role){
+
+note.textContent=
+"Select officer level to choose the required location.";
+
+return;
+
+}
+
+
+/*
+Village Officer
+District + Taluk + Block + Village
+*/
+
+if(role==="VILLAGE_OFFICER"){
+
+districtBox.classList.remove("location-hidden");
+talukBox.classList.remove("location-hidden");
+blockBox.classList.remove("location-hidden");
+villageBox.classList.remove("location-hidden");
+
+note.textContent=
+"Village Officer requires District, Taluk, Block and Village.";
+
+}
+
+
+/*
+Block Officer
+District + Taluk + Block
+*/
+
+else if(role==="BLOCK_OFFICER"){
+
+districtBox.classList.remove("location-hidden");
+talukBox.classList.remove("location-hidden");
+blockBox.classList.remove("location-hidden");
+
+note.textContent=
+"Block Officer requires District, Taluk and Block.";
+
+}
+
+
+/*
+Taluk Officer
+District + Taluk
+*/
+
+else if(role==="TALUK_OFFICER"){
+
+districtBox.classList.remove("location-hidden");
+talukBox.classList.remove("location-hidden");
+
+note.textContent=
+"Taluk Officer requires District and Taluk.";
+
+}
+
+
+/*
+District Officer
+District only
+*/
+
+else if(role==="DISTRICT_OFFICER"){
+
+districtBox.classList.remove("location-hidden");
+
+note.textContent=
+"District Officer requires District only.";
+
+}
+
+
+/*
+Department Officer / Head / State
+No local location
+*/
+
+else{
+
+note.textContent=
+"This officer level does not require a local location.";
+
+}
+
+}
+
+
+/* =====================================================
+   LOGIN
+   ===================================================== */
+
 async function checkLogin(){
 
 const r=await fetch("/api/me");
@@ -443,6 +591,7 @@ return;
 }
 
 currentUser=await r.json();
+
 
 document.getElementById("userInfo").textContent=
 (currentUser.role_name||currentUser.role)
@@ -464,42 +613,66 @@ loadOfficers();
 
 loadComplaints();
 
+updateLocationFields();
+
 }
 
 
+/* =====================================================
+   CREATE OFFICER
+   ===================================================== */
+
 async function createOfficer(){
 
-const error=document.getElementById("error");
-const success=document.getElementById("success");
+const error=
+document.getElementById("error");
+
+const success=
+document.getElementById("success");
 
 error.style.display="none";
 success.style.display="none";
 
 
+const role=
+document.getElementById("role").value;
+
+
 const data={
 
-name:document.getElementById("name").value.trim(),
+name:
+document.getElementById("name")
+.value.trim(),
 
-username:document.getElementById("username").value.trim(),
+username:
+document.getElementById("username")
+.value.trim(),
 
-password:document.getElementById("password").value,
+password:
+document.getElementById("password")
+.value,
 
-role:document.getElementById("role").value,
+role:role,
 
 department_code:
-document.getElementById("department").value,
+document.getElementById("department")
+.value,
 
 district:
-document.getElementById("district").value.trim(),
+document.getElementById("district")
+.value.trim(),
 
 taluk:
-document.getElementById("taluk").value.trim(),
+document.getElementById("taluk")
+.value.trim(),
 
 block:
-document.getElementById("block").value.trim(),
+document.getElementById("block")
+.value.trim(),
 
 village:
-document.getElementById("village").value.trim()
+document.getElementById("village")
+.value.trim()
 
 };
 
@@ -512,8 +685,11 @@ if(
 !data.department_code
 ){
 
-error.textContent="Please fill all required fields.";
+error.textContent=
+"Please fill all required fields.";
+
 error.style.display="block";
+
 return;
 
 }
@@ -525,7 +701,129 @@ error.textContent=
 "Password must contain at least 8 characters.";
 
 error.style.display="block";
+
 return;
+
+}
+
+
+/* LOCATION VALIDATION */
+
+if(
+role==="VILLAGE_OFFICER"
+&&
+(
+!data.district||
+!data.taluk||
+!data.block||
+!data.village
+)
+){
+
+error.textContent=
+"Village Officer requires District, Taluk, Block and Village.";
+
+error.style.display="block";
+
+return;
+
+}
+
+
+if(
+role==="BLOCK_OFFICER"
+&&
+(
+!data.district||
+!data.taluk||
+!data.block
+)
+){
+
+error.textContent=
+"Block Officer requires District, Taluk and Block.";
+
+error.style.display="block";
+
+return;
+
+}
+
+
+if(
+role==="TALUK_OFFICER"
+&&
+(
+!data.district||
+!data.taluk
+)
+){
+
+error.textContent=
+"Taluk Officer requires District and Taluk.";
+
+error.style.display="block";
+
+return;
+
+}
+
+
+if(
+role==="DISTRICT_OFFICER"
+&&
+!data.district
+){
+
+error.textContent=
+"District Officer requires District.";
+
+error.style.display="block";
+
+return;
+
+}
+
+
+/* Clear unnecessary location */
+
+if(
+role==="TALUK_OFFICER"
+){
+
+data.block="";
+data.village="";
+
+}
+
+if(
+role==="BLOCK_OFFICER"
+){
+
+data.village="";
+
+}
+
+if(
+role==="DISTRICT_OFFICER"
+){
+
+data.taluk="";
+data.block="";
+data.village="";
+
+}
+
+if(
+role==="DEPARTMENT_OFFICER"||
+role==="DEPARTMENT_HEAD"||
+role==="STATE_ADMINISTRATOR"
+){
+
+data.district="";
+data.taluk="";
+data.block="";
+data.village="";
 
 }
 
@@ -552,6 +850,7 @@ result.error||
 "Unable to create officer.";
 
 error.style.display="block";
+
 return;
 
 }
@@ -582,21 +881,31 @@ document.getElementById(id).value="";
 });
 
 
+updateLocationFields();
+
 loadOfficers();
 
 }
 
 
+/* =====================================================
+   OFFICER LIST
+   ===================================================== */
+
 async function loadOfficers(){
 
-const r=await fetch("/api/admin/officers");
+const r=
+await fetch("/api/admin/officers");
 
 if(!r.ok)return;
 
 const data=await r.json();
 
-const tbody=document.getElementById("officers");
-const empty=document.getElementById("officerEmpty");
+const tbody=
+document.getElementById("officers");
+
+const empty=
+document.getElementById("officerEmpty");
 
 tbody.innerHTML="";
 
@@ -613,7 +922,9 @@ empty.style.display="none";
 
 data.forEach(o=>{
 
-const tr=document.createElement("tr");
+const tr=
+document.createElement("tr");
+
 
 tr.innerHTML=`
 
@@ -662,6 +973,10 @@ tbody.appendChild(tr);
 }
 
 
+/* =====================================================
+   ENABLE / DISABLE
+   ===================================================== */
+
 async function toggleOfficer(id,active){
 
 if(
@@ -689,9 +1004,14 @@ loadOfficers();
 }
 
 
+/* =====================================================
+   COMPLAINTS
+   ===================================================== */
+
 async function loadComplaints(){
 
-const r=await fetch("/api/department");
+const r=
+await fetch("/api/department");
 
 if(!r.ok){
 
@@ -700,7 +1020,8 @@ return;
 
 }
 
-complaints=await r.json();
+complaints=
+await r.json();
 
 render();
 
@@ -718,7 +1039,8 @@ document.getElementById("filter")
 .value;
 
 
-const list=complaints.filter(c=>{
+const list=
+complaints.filter(c=>{
 
 const s=
 !search||
@@ -736,34 +1058,50 @@ const s=
 .includes(search);
 
 
-return s&&(!filter||c.status===filter);
+return s&&
+(!filter||c.status===filter);
 
 });
 
 
-document.getElementById("total").textContent=list.length;
+document.getElementById("total")
+.textContent=list.length;
 
-document.getElementById("assigned").textContent=
-list.filter(c=>c.status==="Assigned").length;
+document.getElementById("assigned")
+.textContent=
+list.filter(
+c=>c.status==="Assigned"
+).length;
 
-document.getElementById("progress").textContent=
-list.filter(c=>c.status==="In Progress").length;
+document.getElementById("progress")
+.textContent=
+list.filter(
+c=>c.status==="In Progress"
+).length;
 
-document.getElementById("resolved").textContent=
-list.filter(c=>c.status==="Resolved").length;
+document.getElementById("resolved")
+.textContent=
+list.filter(
+c=>c.status==="Resolved"
+).length;
 
 
-const tbody=document.getElementById("complaints");
+const tbody=
+document.getElementById("complaints");
 
 tbody.innerHTML="";
 
-document.getElementById("empty").style.display=
+
+document.getElementById("empty")
+.style.display=
 list.length?"none":"block";
 
 
 list.forEach(c=>{
 
-const tr=document.createElement("tr");
+const tr=
+document.createElement("tr");
+
 
 const sc=
 c.status==="In Progress"
@@ -780,13 +1118,16 @@ c.district,
 c.taluk,
 c.block,
 c.village
-].filter(Boolean).join(" / ")||"-";
+].filter(Boolean)
+.join(" / ")||"-";
 
 
 tr.innerHTML=`
 
 <td>
-<span class="id">${esc(c.complaint_id)}</span>
+<span class="id">
+${esc(c.complaint_id)}
+</span>
 </td>
 
 <td>${esc(c.category||"-")}</td>
@@ -862,7 +1203,8 @@ if(currentUser?.role==="ADMIN"){
 return false;
 }
 
-return c.assigned_role===currentUser?.role;
+return c.assigned_role===
+currentUser?.role;
 
 }
 
@@ -876,7 +1218,8 @@ if(
 )return;
 
 
-const r=await fetch(
+const r=
+await fetch(
 "/api/complaint/"
 +encodeURIComponent(id)
 +"/escalate",
@@ -889,12 +1232,17 @@ headers:{
 );
 
 
-const data=await r.json();
+const data=
+await r.json();
 
 
 if(!r.ok){
 
-alert(data.error||"Escalation failed.");
+alert(
+data.error||
+"Escalation failed."
+);
+
 return;
 
 }
@@ -902,7 +1250,8 @@ return;
 
 alert(
 "✅ Escalated to "+
-(data.new_role_name||"next level")
+(data.new_role_name||
+"next level")
 );
 
 loadComplaints();
@@ -915,7 +1264,8 @@ async function changeStatus(id,status){
 if(!status)return;
 
 
-const r=await fetch(
+const r=
+await fetch(
 "/api/complaint/"
 +encodeURIComponent(id)
 +"/status",
@@ -924,17 +1274,23 @@ method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify({status})
+body:JSON.stringify({
+status:status
+})
 }
 );
 
 
-const data=await r.json();
+const data=
+await r.json();
 
 
 if(!r.ok){
 
-alert(data.error||"Status update failed.");
+alert(
+data.error||
+"Status update failed."
+);
 
 }
 
@@ -943,121 +1299,167 @@ loadComplaints();
 }
 
 
+/* =====================================================
+   VIEW COMPLAINT
+   ===================================================== */
+
 function viewComplaint(id){
 
-const c=complaints.find(
+const c=
+complaints.find(
 x=>x.complaint_id===id
 );
 
 if(!c)return;
 
 
-document.getElementById("dId").textContent=
+document.getElementById("dId")
+.textContent=
 c.complaint_id||"-";
 
-document.getElementById("dComplaint").textContent=
+document.getElementById("dComplaint")
+.textContent=
 c.complaint||"-";
 
-document.getElementById("dCategory").textContent=
+document.getElementById("dCategory")
+.textContent=
 c.category||"-";
 
-document.getElementById("dPriority").textContent=
+document.getElementById("dPriority")
+.textContent=
 c.priority||"-";
 
-document.getElementById("dDepartment").textContent=
-c.department||"-";
+document.getElementById("dDepartment")
+.textContent =
+c.department || "-";
 
-document.getElementById("dLevel").textContent=
-c.assigned_role_name||
-c.assigned_role||
+
+document.getElementById("dLevel")
+.textContent =
+c.assigned_role_name ||
+c.assigned_role ||
 "-";
 
 
-const location=[
-c.district,
-c.taluk,
-c.block,
-c.village
-].filter(Boolean).join(" / ")||"-";
+const location = [
+    c.district,
+    c.taluk,
+    c.block,
+    c.village
+].filter(Boolean).join(" / ") || "-";
 
 
-document.getElementById("dLocation").textContent=
-location;
+document.getElementById("dLocation")
+.textContent = location;
 
-document.getElementById("dStatus").textContent=
-c.status||"-";
 
-document.getElementById("dSummary").textContent=
-c.summary||"-";
+document.getElementById("dStatus")
+.textContent =
+c.status || "-";
 
-document.getElementById("dAction").textContent=
-c.action||"-";
 
-document.getElementById("dImpact").textContent=
-c.impact||"-";
+document.getElementById("dSummary")
+.textContent =
+c.summary || "-";
 
-document.getElementById("dDate").textContent=
-c.created_at||"-";
+
+document.getElementById("dAction")
+.textContent =
+c.action || "-";
+
+
+document.getElementById("dImpact")
+.textContent =
+c.impact || "-";
+
+
+document.getElementById("dDate")
+.textContent =
+c.created_at || "-";
 
 
 document.getElementById("modal")
-.style.display="flex";
+.style.display = "flex";
 
 }
 
+
+/* =====================================================
+   CLOSE MODAL
+   ===================================================== */
 
 function closeModal(){
 
-document.getElementById("modal")
-.style.display="none";
+    document.getElementById("modal")
+    .style.display = "none";
 
 }
 
+
+/* =====================================================
+   LOGOUT
+   ===================================================== */
 
 async function logout(){
 
-await fetch(
-"/api/logout",
-{
-method:"POST"
+    await fetch(
+        "/api/logout",
+        {
+            method: "POST"
+        }
+    );
+
+    location.href = "/login";
+
 }
-);
 
-location.href="/login";
 
-}
-
+/* =====================================================
+   SECURITY HELPERS
+   ===================================================== */
 
 function esc(v){
 
-return String(v??"")
-.replace(/&/g,"&amp;")
-.replace(/</g,"&lt;")
-.replace(/>/g,"&gt;")
-.replace(/"/g,"&quot;")
-.replace(/'/g,"&#039;");
+    return String(v ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 
 }
 
 
 function attr(v){
 
-return String(v??"")
-.replace(/\\/g,"\\\\")
-.replace(/'/g,"\\'");
+    return String(v ?? "")
+        .replace(/\\/g,"\\\\")
+        .replace(/'/g,"\\'");
 
 }
 
 
+/* =====================================================
+   EVENTS
+   ===================================================== */
+
 document.getElementById("search")
-.addEventListener("input",render);
+.addEventListener(
+    "input",
+    render
+);
+
 
 document.getElementById("filter")
-.addEventListener("change",render);
+.addEventListener(
+    "change",
+    render
+);
+
 
 checkLogin();
 
 </script>
 
 </body>
- </html>
+</html>
