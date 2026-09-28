@@ -2151,7 +2151,7 @@ def escalate(complaint_id):
 
     updated = now()
 
-        db.execute("""
+    db.execute("""
         UPDATE complaints
         SET assigned_role = ?,
             assigned_user_id = ?,
